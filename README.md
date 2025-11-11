@@ -4,9 +4,11 @@ A modern, responsive website for Formula IHU - the official Formula Student Comp
 
 ## Features
 
-- **Modern Design**: Clean, minimal, and responsive design built with Next.js and Tailwind CSS
+- **Modern Racing-Inspired Design**: Clean, modern design with racing-inspired accents and animations
+- **Enhanced UX**: Smooth scroll animations, interactive components, and improved mobile experience
 - **CMS Integration**: Content management powered by Sanity.io
 - **All Pages**: Home, About, Sponsors, Join Us, Contact, Rules & Documents, and Team Portal
+- **Interactive Features**: Countdown timers, animated statistics, image galleries, and more
 - **SEO Optimized**: Built-in SEO features with Next.js
 - **Type Safe**: Full TypeScript support
 
