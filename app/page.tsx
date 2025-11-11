@@ -1,65 +1,119 @@
-import Image from "next/image";
+import Hero from '@/components/Hero';
+import NewsSection from '@/components/NewsSection';
+import DocumentCard from '@/components/DocumentCard';
+import StatisticsSection from '@/components/StatisticsSection';
+import { getFeaturedNews, getDocuments } from '@/lib/sanity.queries';
+import Link from 'next/link';
+import { ArrowRight, FileText, Users, Mail } from 'lucide-react';
 
-export default function Home() {
+export default async function Home() {
+  // Fetch data from Sanity (will work once CMS is configured)
+  // For now, these will return empty arrays if CMS is not set up
+  const featuredNews = await getFeaturedNews().catch(() => []);
+  const featuredDocs = await getDocuments().then(docs => 
+    docs.filter((doc: any) => doc.isFeatured).slice(0, 3)
+  ).catch(() => []);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex flex-col">
+      <Hero />
+      
+      {/* Competition Info Section */}
+      <section className="py-24 bg-gradient-to-b from-white via-gray-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              Formula IHU 2025
+            </h2>
+            <p className="text-xl md:text-2xl text-gray-700 max-w-4xl mx-auto leading-relaxed">
+              Formula IHU 2025 will take place from August 26 to 31 at Serres Racing Circuit. 
+              University teams from around the world design, build and race formula-style cars 
+              in an international competition where engineering meets real-world challenge.
+            </p>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* Featured Documents */}
+      {featuredDocs.length > 0 ? (
+        <section className="py-20 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center mb-12">
+              <div>
+                <h2 className="text-4xl font-bold text-gray-900 mb-2">Featured Documents</h2>
+                <p className="text-gray-600">Important competition documents and resources</p>
+              </div>
+              <Link
+                href="/rules"
+                className="text-primary-blue hover:text-primary-blue-dark font-semibold text-base transition-all flex items-center gap-2 group"
+              >
+                View All
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredDocs.map((doc: any) => (
+                <DocumentCard key={doc._id} document={doc} />
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {/* Statistics Section */}
+      <StatisticsSection />
+
+      {/* News Section */}
+      <NewsSection news={featuredNews.length > 0 ? featuredNews : []} />
+
+      {/* Quick Links */}
+      <section className="py-24 bg-gradient-to-b from-gray-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-4xl font-bold text-gray-900 mb-12 text-center">Quick Links</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Link
+              href="/about"
+              className="bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-primary-blue hover:shadow-xl transition-all transform hover:-translate-y-2 text-center group card-hover"
+            >
+              <div className="w-16 h-16 bg-primary-blue/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary-blue/20 transition-colors">
+                <FileText className="w-8 h-8 text-primary-blue" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-primary-blue transition-colors">About</h3>
+              <p className="text-gray-600 text-base">Learn about Formula IHU</p>
+            </Link>
+            <Link
+              href="/sponsors"
+              className="bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-primary-blue hover:shadow-xl transition-all transform hover:-translate-y-2 text-center group card-hover"
+            >
+              <div className="w-16 h-16 bg-primary-blue/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary-blue/20 transition-colors">
+                <Users className="w-8 h-8 text-primary-blue" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-primary-blue transition-colors">Sponsors</h3>
+              <p className="text-gray-600 text-base">Our partners and sponsors</p>
+            </Link>
+            <Link
+              href="/join-us"
+              className="bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-primary-blue hover:shadow-xl transition-all transform hover:-translate-y-2 text-center group card-hover"
+            >
+              <div className="w-16 h-16 bg-primary-blue/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary-blue/20 transition-colors">
+                <Users className="w-8 h-8 text-primary-blue" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-primary-blue transition-colors">Join Us</h3>
+              <p className="text-gray-600 text-base">Become a judge or volunteer</p>
+            </Link>
+            <Link
+              href="/contact"
+              className="bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-primary-blue hover:shadow-xl transition-all transform hover:-translate-y-2 text-center group card-hover"
+            >
+              <div className="w-16 h-16 bg-primary-blue/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary-blue/20 transition-colors">
+                <Mail className="w-8 h-8 text-primary-blue" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-primary-blue transition-colors">Contact</h3>
+              <p className="text-gray-600 text-base">Get in touch with us</p>
+            </Link>
+          </div>
         </div>
-      </main>
+      </section>
     </div>
   );
 }
