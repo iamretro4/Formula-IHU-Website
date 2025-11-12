@@ -31,7 +31,7 @@ A modern, responsive website for Formula IHU - the official Formula Student Comp
 
 1. Clone the repository or navigate to the project directory:
    ```bash
-   cd formulaihu-website
+   cd "Formula IHU Public Website"
    ```
 
 2. Install dependencies:
@@ -68,7 +68,7 @@ Access the Sanity Studio at [http://localhost:3000/studio](http://localhost:3000
 ## Project Structure
 
 ```
-formulaihu-website/
+Formula IHU Public Website/
 ├── app/                    # Next.js App Router pages
 │   ├── about/             # About page
 │   ├── sponsors/          # Sponsors page

@@ -54,7 +54,7 @@ export default function FIHUTeamPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
             <a
-              href="https://formula-ihu-hub.vercel.app/"
+              href={process.env.NEXT_PUBLIC_HUB_URL || 'https://hub.fihu.gr'}
               target="_blank"
               rel="noopener noreferrer"
               className="group"
@@ -77,7 +77,7 @@ export default function FIHUTeamPage() {
             </a>
 
             <a
-              href="https://www.fihu.gr/"
+              href={process.env.NEXT_PUBLIC_FLOW_URL || 'https://flow.fihu.gr'}
               target="_blank"
               rel="noopener noreferrer"
               className="group"
