@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, ChevronDown } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 export default function SponsorApplicationPage() {
   const [formData, setFormData] = useState({
@@ -34,22 +35,54 @@ export default function SponsorApplicationPage() {
     setSubmitStatus('idle');
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setSubmitStatus('success');
-      setFormData({
-        companyName: '',
-        contactName: '',
-        email: '',
-        phone: '',
-        website: '',
-        industry: '',
-        sponsorshipTier: '',
-        budget: '',
-        objectives: '',
-        benefits: '',
-        additionalInfo: '',
-      });
+      // Split contactName into first and last name if possible
+      const nameParts = formData.contactName.trim().split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      const { error } = await supabase
+        .from('applications')
+        .insert([
+          {
+            type: 'sponsor',
+            first_name: firstName,
+            last_name: lastName,
+            email: formData.email,
+            phone: formData.phone || null,
+            organization: formData.companyName || null,
+            additional_data: {
+              website: formData.website || null,
+              industry: formData.industry || null,
+              sponsorshipTier: formData.sponsorshipTier || null,
+              budget: formData.budget || null,
+              objectives: formData.objectives || null,
+              benefits: formData.benefits || null,
+              additionalInfo: formData.additionalInfo || null,
+            },
+          },
+        ]);
+
+      if (error) {
+        console.error('Error submitting application:', error);
+        setSubmitStatus('error');
+      } else {
+        setSubmitStatus('success');
+        setFormData({
+          companyName: '',
+          contactName: '',
+          email: '',
+          phone: '',
+          website: '',
+          industry: '',
+          sponsorshipTier: '',
+          budget: '',
+          objectives: '',
+          benefits: '',
+          additionalInfo: '',
+        });
+      }
     } catch (error) {
+      console.error('Error submitting application:', error);
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);

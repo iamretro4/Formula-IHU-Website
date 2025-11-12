@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
 
 export default function JudgeApplicationPage() {
   const [formData, setFormData] = useState({
@@ -31,24 +32,45 @@ export default function JudgeApplicationPage() {
     setIsSubmitting(true);
     setSubmitStatus('idle');
 
-    // TODO: Implement actual form submission
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setSubmitStatus('success');
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        organization: '',
-        position: '',
-        experience: '',
-        expertise: '',
-        availability: '',
-        motivation: '',
-      });
+      const { error } = await supabase
+        .from('applications')
+        .insert([
+          {
+            type: 'judge',
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            email: formData.email,
+            phone: formData.phone || null,
+            organization: formData.organization || null,
+            position: formData.position || null,
+            experience: formData.experience || null,
+            expertise: formData.expertise || null,
+            availability: formData.availability || null,
+            motivation: formData.motivation || null,
+          },
+        ]);
+
+      if (error) {
+        console.error('Error submitting application:', error);
+        setSubmitStatus('error');
+      } else {
+        setSubmitStatus('success');
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '',
+          organization: '',
+          position: '',
+          experience: '',
+          expertise: '',
+          availability: '',
+          motivation: '',
+        });
+      }
     } catch (error) {
+      console.error('Error submitting application:', error);
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);

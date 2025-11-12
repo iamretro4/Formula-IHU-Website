@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
 
 export default function VolunteerApplicationPage() {
   const [formData, setFormData] = useState({
@@ -31,20 +32,44 @@ export default function VolunteerApplicationPage() {
     setSubmitStatus('idle');
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setSubmitStatus('success');
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        age: '',
-        availability: '',
-        interests: '',
-        experience: '',
-        motivation: '',
-      });
+      const { error } = await supabase
+        .from('applications')
+        .insert([
+          {
+            type: 'volunteer',
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            email: formData.email,
+            phone: formData.phone || null,
+            experience: formData.experience || null,
+            availability: formData.availability || null,
+            motivation: formData.motivation || null,
+            additional_data: {
+              age: formData.age || null,
+              interests: formData.interests || null,
+            },
+          },
+        ]);
+
+      if (error) {
+        console.error('Error submitting application:', error);
+        setSubmitStatus('error');
+      } else {
+        setSubmitStatus('success');
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '',
+          age: '',
+          availability: '',
+          interests: '',
+          experience: '',
+          motivation: '',
+        });
+      }
     } catch (error) {
+      console.error('Error submitting application:', error);
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);

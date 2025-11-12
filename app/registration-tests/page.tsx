@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { QuizData, Question, QuizStatus, TeamInfo, Answers } from './types';
 import { quizService } from './services/quizService';
 import { useQuizTimer } from './hooks/useQuizTimer';
+import { supabase } from '@/lib/supabase';
 import Header from './components/Header';
 import PreQuizView from './components/PreQuizView';
 import QuizView from './components/QuizView';
@@ -54,6 +55,34 @@ export default function RegistrationTestsPage() {
     const finalScore = quizService.submitAnswers(answers, quizData.questions);
     setScore(finalScore);
     setAppState('submitted');
+
+    // Save to Supabase
+    try {
+      const { error: dbError } = await supabase
+        .from('quiz_submissions')
+        .insert([
+          {
+            team_name: teamInfo.name,
+            team_email: teamInfo.email,
+            time_taken: timeDiff,
+            score: finalScore,
+            questions: quizData.questions.map(q => ({
+              id: q.id,
+              text: q.text,
+              options: q.options,
+            })),
+            answers: answers,
+          },
+        ]);
+
+      if (dbError) {
+        console.error('Error saving quiz submission to database:', dbError);
+        // Don't block submission if database save fails
+      }
+    } catch (error) {
+      console.error('Error saving quiz submission:', error);
+      // Don't block submission if database save fails
+    }
 
     // Send confirmation email
     try {

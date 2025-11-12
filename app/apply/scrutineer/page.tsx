@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
 
 export default function ScrutineerApplicationPage() {
   const [formData, setFormData] = useState({
@@ -32,21 +33,44 @@ export default function ScrutineerApplicationPage() {
     setSubmitStatus('idle');
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setSubmitStatus('success');
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        organization: '',
-        position: '',
-        experience: '',
-        certifications: '',
-        availability: '',
-        motivation: '',
-      });
+      const { error } = await supabase
+        .from('applications')
+        .insert([
+          {
+            type: 'scrutineer',
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            email: formData.email,
+            phone: formData.phone || null,
+            organization: formData.organization || null,
+            position: formData.position || null,
+            experience: formData.experience || null,
+            expertise: formData.certifications || null, // Using expertise field for certifications
+            availability: formData.availability || null,
+            motivation: formData.motivation || null,
+          },
+        ]);
+
+      if (error) {
+        console.error('Error submitting application:', error);
+        setSubmitStatus('error');
+      } else {
+        setSubmitStatus('success');
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '',
+          organization: '',
+          position: '',
+          experience: '',
+          certifications: '',
+          availability: '',
+          motivation: '',
+        });
+      }
     } catch (error) {
+      console.error('Error submitting application:', error);
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
