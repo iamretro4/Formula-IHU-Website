@@ -2,6 +2,9 @@ import { notFound } from 'next/navigation';
 import { getEventByYear, getResults } from '@/lib/sanity.queries';
 import Link from 'next/link';
 
+// Revalidate this page every 60 seconds (fallback if webhook fails)
+export const revalidate = 60;
+
 export default async function YearResultsPage({
   params,
 }: {

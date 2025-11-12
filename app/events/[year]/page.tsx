@@ -5,6 +5,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import DocumentCard from '@/components/DocumentCard';
 
+// Revalidate this page every 60 seconds (fallback if webhook fails)
+export const revalidate = 60;
+
 export default async function EventPage({
   params,
 }: {

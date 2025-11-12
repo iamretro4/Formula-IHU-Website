@@ -12,6 +12,9 @@ const tierLabels: Record<string, string> = {
   partner: 'Partners',
 };
 
+// Revalidate this page every 60 seconds (fallback if webhook fails)
+export const revalidate = 60;
+
 export default async function SponsorsPage() {
   const sponsors = await getSponsors().catch(() => []);
 

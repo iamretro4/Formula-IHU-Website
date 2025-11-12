@@ -6,6 +6,9 @@ import { getFeaturedNews, getDocuments } from '@/lib/sanity.queries';
 import Link from 'next/link';
 import { ArrowRight, FileText, Users, Mail } from 'lucide-react';
 
+// Revalidate this page every 60 seconds (fallback if webhook fails)
+export const revalidate = 60;
+
 export default async function Home() {
   // Fetch data from Sanity (will work once CMS is configured)
   // For now, these will return empty arrays if CMS is not set up

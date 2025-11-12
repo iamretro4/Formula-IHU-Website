@@ -9,6 +9,9 @@ const categoryLabels: Record<string, string> = {
   other: 'Other',
 };
 
+// Revalidate this page every 60 seconds (fallback if webhook fails)
+export const revalidate = 60;
+
 export default async function RulesPage() {
   const allDocuments = await getDocuments().catch(() => []);
   const categories = Array.from(new Set(allDocuments.map((doc: any) => doc.category)));

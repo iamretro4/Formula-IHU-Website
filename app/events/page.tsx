@@ -15,6 +15,9 @@ const statusColors: Record<string, string> = {
   past: 'bg-gray-100 text-gray-800',
 };
 
+// Revalidate this page every 60 seconds (fallback if webhook fails)
+export const revalidate = 60;
+
 export default async function EventsPage() {
   const allEvents = await getEvents().catch(() => []);
   

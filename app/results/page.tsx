@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import { getEvents, getResults } from '@/lib/sanity.queries';
 
+// Revalidate this page every 60 seconds (fallback if webhook fails)
+export const revalidate = 60;
+
 export default async function ResultsPage() {
   const events = await getEvents('past').catch(() => []);
   const allResults = await getResults().catch(() => []);

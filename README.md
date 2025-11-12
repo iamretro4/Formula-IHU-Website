@@ -130,6 +130,52 @@ The site can be deployed to any platform that supports Next.js:
 - `NEXT_PUBLIC_SANITY_PROJECT_ID`: Your Sanity project ID
 - `NEXT_PUBLIC_SANITY_DATASET`: Your Sanity dataset name (usually "production")
 - `SANITY_API_TOKEN`: Your Sanity API token (for write operations)
+- `REVALIDATE_SECRET`: Secret token for on-demand revalidation webhook (generate a random string)
+
+## CMS Content Updates
+
+The site uses Next.js static generation with revalidation. When you update content in Sanity CMS, you have two options to see changes on the deployed site:
+
+### Option 1: Automatic Revalidation via Webhook (Recommended)
+
+Set up a Sanity webhook to automatically trigger revalidation when content changes:
+
+1. **Get your revalidation endpoint URL:**
+   - Your deployed site URL: `https://yourdomain.com/api/revalidate?secret=YOUR_REVALIDATE_SECRET`
+   - Replace `YOUR_REVALIDATE_SECRET` with the value from your environment variables
+
+2. **Configure Sanity Webhook:**
+   - Go to [Sanity Manage](https://www.sanity.io/manage)
+   - Select your project
+   - Navigate to **API** → **Webhooks**
+   - Click **Create webhook**
+   - **Name**: "Vercel Revalidation" (or any name)
+   - **URL**: `https://yourdomain.com/api/revalidate?secret=YOUR_REVALIDATE_SECRET`
+   - **Dataset**: production
+   - **Trigger on**: Create, Update, Delete
+   - **Filter**: Leave empty (or customize if needed)
+   - **HTTP method**: POST
+   - **API version**: 2021-03-25 or later
+   - Click **Save**
+
+3. **Alternative: Use Vercel Deploy Hook (Simpler)**
+   - Go to Vercel Dashboard → Your Project → Settings → Git → Deploy Hooks
+   - Create a new hook named "Sanity Updates"
+   - Copy the hook URL
+   - Use this URL in your Sanity webhook instead of the revalidation endpoint
+   - This will trigger a full rebuild instead of on-demand revalidation
+
+### Option 2: Time-based Revalidation (Fallback)
+
+All pages have a 60-second revalidation interval as a fallback. This means pages will automatically refresh their content every 60 seconds, even without webhooks. However, webhooks provide instant updates.
+
+### Testing Revalidation
+
+After setting up the webhook, test it by:
+1. Making a change in Sanity Studio
+2. Publishing the change
+3. The webhook should trigger automatically
+4. Check your site within a few seconds to see the update
 
 ## License
 

@@ -1,5 +1,8 @@
 import { getPageContent } from '@/lib/sanity.queries';
 
+// Revalidate this page every 60 seconds (fallback if webhook fails)
+export const revalidate = 60;
+
 export default async function AboutPage() {
   const pageContent = await getPageContent('about').catch(() => null);
 
