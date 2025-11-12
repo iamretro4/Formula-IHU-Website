@@ -7,6 +7,14 @@ const nextConfig: NextConfig = {
     // Client-side variables must be prefixed with NEXT_PUBLIC_
     // Server-side variables can be any name
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cdn.sanity.io',
+      },
+    ],
+  },
 };
 
 export default nextConfig;

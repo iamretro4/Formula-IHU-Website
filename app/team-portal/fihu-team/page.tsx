@@ -52,7 +52,7 @@ export default function FIHUTeamPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
             <a
               href={process.env.NEXT_PUBLIC_HUB_URL || 'https://hub.fihu.gr'}
               target="_blank"
@@ -98,6 +98,31 @@ export default function FIHUTeamPage() {
                 </div>
               </div>
             </a>
+
+            <Link
+              href="/registration-tests"
+              className="group"
+            >
+              <div className="bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-primary-blue hover:shadow-xl transition-all transform hover:-translate-y-2 card-hover text-center h-full flex flex-col items-center justify-center">
+                <div className="w-16 h-16 bg-primary-blue/10 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-primary-blue/20 transition-colors">
+                  <svg className="w-8 h-8 text-primary-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-primary-blue transition-colors">
+                  Registration Tests
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Take the Formula IHU registration quiz
+                </p>
+                <div className="flex items-center text-primary-blue font-semibold text-sm group-hover:gap-2 transition-all">
+                  Start Quiz
+                  <svg className="w-4 h-4 ml-2 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </div>
+            </Link>
           </div>
         </div>
       </div>
