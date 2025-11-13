@@ -23,10 +23,30 @@ const Studio = dynamic(
       return function StudioComponent() {
         return <NextStudio config={config.default} />;
       };
+    }).catch((error) => {
+      console.error('Failed to load Sanity Studio:', error);
+      return function ErrorComponent() {
+        return (
+          <div className="min-h-screen flex items-center justify-center bg-gray-50">
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-red-600 mb-4">Failed to Load Studio</h2>
+              <p className="text-gray-600 mb-2">Error: {error.message}</p>
+              <p className="text-sm text-gray-500">Please check your environment variables and try again.</p>
+            </div>
+          </div>
+        );
+      };
     }),
   {
     ssr: false,
-    loading: () => null,
+    loading: () => (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading Sanity Studio...</p>
+        </div>
+      </div>
+    ),
   }
 );
 
@@ -40,11 +60,16 @@ export default function StudioPage() {
   const checkAuth = async () => {
     try {
       const response = await fetch('/api/studio-auth');
+      if (!response.ok) {
+        console.error('Auth check failed:', response.status);
+        return;
+      }
       const data = await response.json();
       if (data.authenticated) {
         setIsAuthenticated(true);
       }
     } catch (err) {
+      console.error('Auth check error:', err);
       // Ignore errors, user not authenticated
     }
   };
@@ -67,6 +92,13 @@ export default function StudioPage() {
         body: JSON.stringify({ password }),
       });
 
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        setError(errorData.error || `Server error (${response.status}). Please try again.`);
+        setPassword('');
+        return;
+      }
+
       const data = await response.json();
 
       if (data.success) {
@@ -77,7 +109,8 @@ export default function StudioPage() {
         setPassword('');
       }
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      console.error('Password submit error:', err);
+      setError('Network error. Please check your connection and try again.');
       setPassword('');
     }
   };

@@ -11,11 +11,14 @@ export async function POST(request: NextRequest) {
       const response = NextResponse.json({ success: true });
       
       // Set a secure HTTP-only cookie
+      // In production (Vercel), always use secure cookies for HTTPS
+      const isProduction = !!process.env.VERCEL || process.env.NODE_ENV === 'production';
       response.cookies.set('studio_authenticated', 'true', {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: isProduction,
         sameSite: 'lax',
         maxAge: 60 * 60 * 24 * 7, // 7 days
+        path: '/',
       });
       
       return response;
