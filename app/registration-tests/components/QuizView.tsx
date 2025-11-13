@@ -44,6 +44,16 @@ const QuizView: React.FC<QuizViewProps> = ({ questions, answers, setAnswers, onS
               <span className="text-blue-600 font-bold mr-2">Q{index + 1}.</span>
               {q.text}
             </p>
+            {q.image && (
+              <div className="mb-4">
+                <img 
+                  src={q.image} 
+                  alt={`Question ${index + 1} illustration`}
+                  className="max-w-full h-auto rounded-lg border border-gray-200 shadow-sm"
+                  style={{ maxHeight: '400px' }}
+                />
+              </div>
+            )}
             <div className="space-y-3">
               {q.options.map(option => {
                 const isSelected = answers[q.id] === option;

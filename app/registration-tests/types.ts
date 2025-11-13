@@ -4,10 +4,11 @@ export interface Question {
   text: string;
   options: string[];
   correctOption: string;
+  image?: string | null; // Optional image URL
 }
 
 export interface QuizData {
-  id: number;
+  id: string | number;
   title: string;
   globalStartTime: Date;
   endTime: Date;

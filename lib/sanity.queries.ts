@@ -140,30 +140,6 @@ export async function getEventByYear(year: number) {
   return await client.fetch(query, { year });
 }
 
-// Gallery queries
-export async function getGalleryImages(eventId?: string, category?: string, featured?: boolean) {
-  let filters = [];
-  if (eventId) filters.push(`event._ref == "${eventId}"`);
-  if (category) filters.push(`category == "${category}"`);
-  if (featured) filters.push(`featured == true`);
-  
-  const filterString = filters.length > 0 ? `&& ${filters.join(' && ')}` : '';
-  const query = groq`*[_type == "gallery" ${filterString}] | order(publishedAt desc) {
-    _id,
-    image,
-    caption,
-    category,
-    featured,
-    photographer,
-    publishedAt,
-    event->{
-      _id,
-      year,
-      title
-    }
-  }`;
-  return await client.fetch(query);
-}
 
 // Results queries
 export async function getResults(eventId?: string, category?: string) {
@@ -177,7 +153,6 @@ export async function getResults(eventId?: string, category?: string) {
     category,
     position,
     points,
-    awards,
     year,
     event->{
       _id,
@@ -195,64 +170,6 @@ export async function getResults(eventId?: string, category?: string) {
   return await client.fetch(query);
 }
 
-// Visitor info queries
-export async function getVisitorInfo(eventId?: string) {
-  const eventFilter = eventId ? `&& event._ref == "${eventId}"` : '';
-  const query = groq`*[_type == "visitorInfo" ${eventFilter}][0] {
-    _id,
-    ticketPrice,
-    ticketLink,
-    schedule,
-    location,
-    address,
-    directions,
-    parking,
-    facilities,
-    openHours,
-    mapEmbed,
-    event->{
-      _id,
-      year,
-      title
-    }
-  }`;
-  return await client.fetch(query);
-}
-
-// Awards queries
-export async function getAwards(eventId?: string, category?: string) {
-  let filters = [];
-  if (eventId) filters.push(`event._ref == "${eventId}"`);
-  if (category) filters.push(`category == "${category}"`);
-  
-  const filterString = filters.length > 0 ? `&& ${filters.join(' && ')}` : '';
-  const query = groq`*[_type == "award" ${filterString}] | order(year desc) {
-    _id,
-    name,
-    description,
-    category,
-    prize,
-    year,
-    event->{
-      _id,
-      year,
-      title
-    },
-    sponsor->{
-      _id,
-      name,
-      logo
-    },
-    winner->{
-      _id,
-      name,
-      university,
-      country,
-      logo
-    }
-  }`;
-  return await client.fetch(query);
-}
 
 // Statistics query
 export async function getStatistics() {

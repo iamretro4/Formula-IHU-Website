@@ -7,9 +7,10 @@ interface PreQuizViewProps {
   teamInfo: TeamInfo;
   setTeamInfo: (info: TeamInfo) => void;
   onStart: () => void;
+  instructions?: string;
 }
 
-const PreQuizView: React.FC<PreQuizViewProps> = ({ teamInfo, setTeamInfo, onStart }) => {
+const PreQuizView: React.FC<PreQuizViewProps> = ({ teamInfo, setTeamInfo, onStart, instructions }) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setTeamInfo({ ...teamInfo, [name]: value });
@@ -23,6 +24,12 @@ const PreQuizView: React.FC<PreQuizViewProps> = ({ teamInfo, setTeamInfo, onStar
         <div className="text-center">
             <h2 className="text-3xl font-bold text-gray-900">Quiz Registration</h2>
             <p className="mt-2 text-gray-500">Please enter your team details below to begin the quiz.</p>
+            {instructions && (
+              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg text-left">
+                <p className="text-sm font-semibold text-blue-900 mb-2">Instructions:</p>
+                <p className="text-sm text-blue-800 whitespace-pre-line">{instructions}</p>
+              </div>
+            )}
         </div>
 
         <form className="space-y-4">
