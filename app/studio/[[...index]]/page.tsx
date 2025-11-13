@@ -81,7 +81,28 @@ export default function StudioPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isClient, setIsClient] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<any>(null);
 
+  // Check client-side environment variables (NEXT_PUBLIC_ vars are embedded at build time)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const clientEnv = {
+        hasProjectId: !!(window as any).__NEXT_DATA__?.env?.NEXT_PUBLIC_SANITY_PROJECT_ID || 
+                       process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
+        projectId: (window as any).__NEXT_DATA__?.env?.NEXT_PUBLIC_SANITY_PROJECT_ID || 
+                   process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'NOT AVAILABLE IN CLIENT',
+        hasDataset: !!(window as any).__NEXT_DATA__?.env?.NEXT_PUBLIC_SANITY_DATASET || 
+                    process.env.NEXT_PUBLIC_SANITY_DATASET,
+      };
+      setDebugInfo(clientEnv);
+      
+      // Log for debugging
+      console.log('Client-side env check:', clientEnv);
+      if (!clientEnv.hasProjectId) {
+        console.error('⚠️ NEXT_PUBLIC_SANITY_PROJECT_ID is not available in the client bundle. This means it was missing during build time.');
+      }
+    }
+  }, []);
 
   const checkAuth = async () => {
     try {
@@ -157,6 +178,14 @@ export default function StudioPage() {
             <p className="mt-2 text-sm text-gray-600">
               Please enter the password to access the content management system
             </p>
+            {debugInfo && !debugInfo.hasProjectId && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded text-left">
+                <p className="text-xs text-red-700 font-semibold mb-1">⚠️ Configuration Issue:</p>
+                <p className="text-xs text-red-600">
+                  Project ID not available in client. This usually means environment variables were added after the build. Please redeploy.
+                </p>
+              </div>
+            )}
           </div>
           <form className="mt-8 space-y-6" onSubmit={handlePasswordSubmit}>
             <div>
