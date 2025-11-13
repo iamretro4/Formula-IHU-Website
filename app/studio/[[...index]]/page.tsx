@@ -18,9 +18,35 @@ const Studio = dynamic(
   () =>
     Promise.all([
       import('next-sanity/studio').then((mod) => mod.NextStudio),
-      import('../../../sanity.config'),
+      import('../../../sanity.config').catch((err) => {
+        console.error('Failed to import sanity.config:', err);
+        // Return a minimal config that will show Sanity's error UI
+        return {
+          default: {
+            projectId: '',
+            dataset: 'production',
+            basePath: '/studio',
+          },
+        };
+      }),
     ]).then(([NextStudio, config]) => {
       return function StudioComponent() {
+        // Check if projectId is missing
+        if (!config.default?.projectId) {
+          return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+              <div className="max-w-md w-full text-center">
+                <h2 className="text-2xl font-bold text-red-600 mb-4">Configuration Error</h2>
+                <p className="text-gray-600 mb-4">
+                  The Sanity project ID is not configured. Please add <code className="bg-gray-100 px-2 py-1 rounded">NEXT_PUBLIC_SANITY_PROJECT_ID</code> to your environment variables.
+                </p>
+                <p className="text-sm text-gray-500">
+                  In Vercel: Go to Settings → Environment Variables and add the variable for Production, Preview, and Development environments.
+                </p>
+              </div>
+            </div>
+          );
+        }
         return <NextStudio config={config.default} />;
       };
     }).catch((error) => {
