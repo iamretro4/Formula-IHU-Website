@@ -10,6 +10,8 @@ interface Document {
   file: {
     asset: {
       url: string;
+      originalFilename?: string;
+      mimeType?: string;
     };
   };
   publishedAt?: string;
@@ -34,11 +36,15 @@ export default function DocumentCard({ document }: DocumentCardProps) {
   const getDownloadUrl = (url: string | undefined) => {
     if (!url) return null;
     
-    // Create a safe filename from document title
-    const filename = document.title
-      .replace(/[^a-z0-9\s-]/gi, '')
-      .replace(/\s+/g, '_')
-      .toLowerCase() + '.pdf';
+    // Use original filename if available, otherwise generate from title
+    const originalFilename = document.file?.asset?.originalFilename;
+    const filename = originalFilename || 
+      document.title
+        .replace(/[^a-z0-9\s-]/gi, '')
+        .replace(/\s+/g, '_')
+        .toLowerCase() + 
+      (document.file?.asset?.mimeType === 'application/pdf' ? '.pdf' : 
+       document.file?.asset?.mimeType?.includes('word') ? '.docx' : '.pdf');
     
     // Use API route to proxy the download
     return `/api/download?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`;

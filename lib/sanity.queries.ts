@@ -33,7 +33,14 @@ export async function getDocuments(category?: string) {
     title,
     description,
     category,
-    file,
+    file {
+      asset-> {
+        url,
+        originalFilename,
+        size,
+        mimeType
+      }
+    },
     publishedAt,
     isFeatured
   }`;
@@ -299,7 +306,14 @@ export async function getEventDocuments(eventId: string) {
     title,
     description,
     category,
-    file,
+    file {
+      asset-> {
+        url,
+        originalFilename,
+        size,
+        mimeType
+      }
+    },
     publishedAt,
     isFeatured
   }`;
