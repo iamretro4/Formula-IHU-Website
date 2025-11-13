@@ -55,7 +55,10 @@ export default function QuizAdminPage() {
         const data = await submissionsRes.json();
         setSubmissions(data.submissions || []);
       } else {
-        console.error('Failed to fetch submissions:', submissionsRes.status);
+        const errorData = await submissionsRes.json().catch(() => ({}));
+        console.error('Failed to fetch submissions:', submissionsRes.status, errorData);
+        // Set empty array on error so UI doesn't break
+        setSubmissions([]);
       }
 
       // First try to fetch active quiz config

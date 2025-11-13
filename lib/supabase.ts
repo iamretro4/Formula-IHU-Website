@@ -3,12 +3,17 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-// Create a client only if both URL and key are provided
-// Otherwise, create a dummy client that will throw errors when used
-export const supabase = supabaseUrl && supabaseAnonKey
+// Create a client only if both URL and key are provided and valid
+// Check for placeholder values to ensure real credentials are used
+const isValidConfig = supabaseUrl && 
+                      supabaseAnonKey && 
+                      !supabaseUrl.includes('placeholder') && 
+                      supabaseUrl.startsWith('https://');
+
+export const supabase = isValidConfig
   ? createClient(supabaseUrl, supabaseAnonKey)
   : createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key'
+      'https://placeholder.supabase.co',
+      'placeholder-key'
     );
 
