@@ -5,13 +5,11 @@ import pageContent from './pageContent';
 import siteSettings from './siteSettings';
 import { postType } from './postType';
 import event from './event';
-import gallery from './gallery';
 import result from './result';
-import visitorInfo from './visitorInfo';
-import award from './award';
 import statistic from './statistic';
 import scheduleItem from './scheduleItem';
 import team from './team';
+import registrationQuiz from './registrationQuiz';
 
 export const schemaTypes = [
   news,
@@ -21,12 +19,10 @@ export const schemaTypes = [
   siteSettings,
   postType,
   event,
-  gallery,
   result,
-  visitorInfo,
-  award,
   statistic,
   scheduleItem,
   team,
+  registrationQuiz,
 ];
 

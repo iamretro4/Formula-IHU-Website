@@ -10,6 +10,8 @@ interface Document {
   file: {
     asset: {
       url: string;
+      originalFilename?: string;
+      mimeType?: string;
     };
   };
   publishedAt?: string;
@@ -29,6 +31,26 @@ const categoryLabels: Record<string, string> = {
 
 export default function DocumentCard({ document }: DocumentCardProps) {
   const fileUrl = document.file?.asset?.url;
+  
+  // Get download URL through API proxy for better compatibility
+  const getDownloadUrl = (url: string | undefined) => {
+    if (!url) return null;
+    
+    // Use original filename if available, otherwise generate from title
+    const originalFilename = document.file?.asset?.originalFilename;
+    const filename = originalFilename || 
+      document.title
+        .replace(/[^a-z0-9\s-]/gi, '')
+        .replace(/\s+/g, '_')
+        .toLowerCase() + 
+      (document.file?.asset?.mimeType === 'application/pdf' ? '.pdf' : 
+       document.file?.asset?.mimeType?.includes('word') ? '.docx' : '.pdf');
+    
+    // Use API route to proxy the download
+    return `/api/download?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`;
+  };
+
+  const downloadUrl = getDownloadUrl(fileUrl);
 
   return (
     <Card className="h-full flex flex-col group">
@@ -51,9 +73,10 @@ export default function DocumentCard({ document }: DocumentCardProps) {
         )}
       </div>
       <div className="mt-auto pt-4 border-t border-gray-100">
-        {fileUrl && (
+        {downloadUrl && (
           <a
-            href={fileUrl}
+            href={downloadUrl}
+            download
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center text-primary-blue hover:text-primary-blue-dark font-semibold text-sm transition-all group/link"

@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getEventByYear, getEventDocuments, getSchedule, getRegisteredTeams, getResults, getAwards, getGalleryImages } from '@/lib/sanity.queries';
+import { getEventByYear, getEventDocuments, getSchedule, getRegisteredTeams, getResults } from '@/lib/sanity.queries';
 import { urlFor } from '@/sanity/lib/image';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -26,13 +26,11 @@ export default async function EventPage({
     notFound();
   }
 
-  const [documents, schedule, teams, results, awards, gallery] = await Promise.all([
+  const [documents, schedule, teams, results] = await Promise.all([
     getEventDocuments(event._id).catch(() => []),
     getSchedule(event._id).catch(() => []),
     getRegisteredTeams(event._id).catch(() => []),
     getResults(event._id).catch(() => []),
-    getAwards(event._id).catch(() => []),
-    getGalleryImages(event._id, undefined, true).catch(() => []),
   ]);
 
   const formatDate = (dateString: string) => {
@@ -266,61 +264,6 @@ export default async function EventPage({
               </section>
         )}
 
-        {/* Awards */}
-        {awards.length > 0 ? (
-          <section className="mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-8">Awards</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {awards.map((award: any) => (
-                    <div key={award._id} className="bg-gray-50 border-2 border-gray-200 rounded-xl p-6 hover:border-[#0066FF] hover:shadow-xl transition-all transform hover:-translate-y-2">
-                      <h3 className="font-bold text-gray-900 mb-2">{award.name}</h3>
-                      {award.description && (
-                        <p className="text-sm text-gray-600 mb-3">{award.description}</p>
-                      )}
-                      {award.winner && (
-                        <p className="text-sm font-bold text-gray-900">
-                          Winner: {award.winner.name}
-                        </p>
-                      )}
-                      {award.prize && (
-                        <p className="text-sm text-gray-600 mt-1">Prize: {award.prize}</p>
-                      )}
-                </div>
-              ))}
-            </div>
-          </section>
-        ) : (
-              <section className="mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-8">Awards</h2>
-                <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl p-16 text-center border-2 border-gray-200">
-                  <div className="text-7xl mb-6">🏆</div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Awards Coming Soon</h3>
-                  <p className="text-gray-700 text-lg">Award winners will be announced after the competition.</p>
-                </div>
-              </section>
-        )}
-
-        {/* Gallery Preview */}
-        {gallery.length > 0 && (
-          <section>
-            <h2 className="text-3xl font-bold text-gray-900 mb-8">Gallery</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {gallery.slice(0, 8).map((item: any) => (
-                <div
-                  key={item._id}
-                  className="relative aspect-square rounded-lg overflow-hidden"
-                >
-                  <Image
-                    src={urlFor(item.image).width(300).height(300).url()}
-                    alt={item.caption || 'Gallery image'}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
       </div>
     </div>
   );

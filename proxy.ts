@@ -29,12 +29,14 @@ const CACHE_DURATION = 30000; // 30 seconds cache
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Skip redirect for excluded paths
+  // Allow access to API routes, admin routes, and static files
   if (
-    EXCLUDED_PATHS.some((path) => pathname.startsWith(path)) ||
-    pathname.startsWith('/_next/') ||
-    pathname.startsWith('/api/') ||
-    pathname.startsWith('/studio/')
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/studio') ||
+    pathname.startsWith('/registration-tests/admin') ||
+    pathname.match(/\.(ico|png|jpg|jpeg|svg|gif|woff|woff2|ttf|eot)$/) ||
+    EXCLUDED_PATHS.some((path) => pathname.startsWith(path))
   ) {
     return NextResponse.next();
   }
@@ -115,4 +117,3 @@ export const config = {
     '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };
-
