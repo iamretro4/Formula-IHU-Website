@@ -130,7 +130,12 @@ The site can be deployed to any platform that supports Next.js:
 - `NEXT_PUBLIC_SANITY_PROJECT_ID`: Your Sanity project ID
 - `NEXT_PUBLIC_SANITY_DATASET`: Your Sanity dataset name (usually "production")
 - `SANITY_API_TOKEN`: Your Sanity API token (for write operations)
+- `STUDIO_PASSWORD`: Password to access Sanity Studio (defaults to 'admin' if not set)
 - `REVALIDATE_SECRET`: Secret token for on-demand revalidation webhook (generate a random string)
+- `NEXT_PUBLIC_SUPABASE_URL`: Supabase project URL (for quiz functionality)
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Supabase anonymous key (for quiz functionality)
+- `RESEND_API_KEY`: Resend API key for sending quiz confirmation emails (optional)
+- `FROM_EMAIL`: Email address to send from (optional, defaults to 'Formula IHU <noreply@fihu.gr>')
 
 ## CMS Content Updates
 

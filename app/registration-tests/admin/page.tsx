@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Lock, BarChart3, Users, FileText, Settings, CheckCircle2, XCircle, Clock, X } from 'lucide-react';
+import { Lock, BarChart3, Users, FileText, Settings, CheckCircle2, XCircle, Clock, X, Upload, Download } from 'lucide-react';
 import Button from '@/components/ui/Button';
 
 interface QuizSubmission {
@@ -27,6 +27,10 @@ export default function QuizAdminPage() {
   const [activeTab, setActiveTab] = useState<'results' | 'config'>('results');
   const [selectedSubmission, setSelectedSubmission] = useState<QuizSubmission | null>(null);
   const [showAnswersModal, setShowAnswersModal] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState('');
+  const [importSuccess, setImportSuccess] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // Check admin authentication
@@ -139,6 +143,87 @@ export default function QuizAdminPage() {
     const perfectScores = submissions.filter(s => s.score === totalQuestions).length;
 
     return { totalTeams, avgScore, avgTime, perfectScores, totalQuestions };
+  };
+
+  const handleImportCSV = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImporting(true);
+    setImportError('');
+    setImportSuccess('');
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const quizId = quizConfig?.id || null;
+      const url = `/api/quiz/import${quizId ? `?quizId=${quizId}` : ''}`;
+
+      const response = await fetch(url, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || data.details || 'Import failed');
+      }
+
+      setImportSuccess(data.message || 'Successfully imported questions');
+      await fetchData();
+      
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (error: any) {
+      setImportError(error.message || 'Failed to import CSV');
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const handleExportCSV = async () => {
+    try {
+      const response = await fetch('/api/quiz/export/csv');
+      if (!response.ok) {
+        throw new Error('Export failed');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `quiz-results-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      alert('Failed to export CSV. Please try again.');
+    }
+  };
+
+  const handleExportPDF = async () => {
+    try {
+      const response = await fetch('/api/quiz/export/pdf');
+      if (!response.ok) {
+        throw new Error('Export failed');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `quiz-results-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      alert('Failed to export PDF. Please try again.');
+    }
   };
 
   if (!isAuthenticated) {
@@ -275,6 +360,32 @@ export default function QuizAdminPage() {
                 </div>
               </div>
             )}
+
+            {/* Export Buttons */}
+            <div className="bg-white shadow rounded-lg p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Export Results</h3>
+                  <p className="text-sm text-gray-600">Download quiz results in CSV or PDF format</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handleExportCSV}
+                    className="flex items-center gap-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    Export CSV
+                  </Button>
+                  <Button
+                    onClick={handleExportPDF}
+                    className="flex items-center gap-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    Export PDF
+                  </Button>
+                </div>
+              </div>
+            </div>
 
             {/* Submissions Table */}
             <div className="bg-white shadow rounded-lg overflow-hidden">
@@ -418,14 +529,77 @@ export default function QuizAdminPage() {
         )}
 
         {activeTab === 'config' && (
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Quiz Configuration</h2>
-            <p className="text-gray-600 mb-4">
-              To manage quiz questions, time limits, and schedule, please use Sanity Studio.
-            </p>
-            <Button onClick={() => router.push('/studio')}>
-              Open Sanity Studio
-            </Button>
+          <div className="space-y-6">
+            {/* Import Questions Section */}
+            <div className="bg-white shadow rounded-lg p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Import Questions from CSV</h2>
+              <p className="text-gray-600 mb-4">
+                Upload a CSV file to import quiz questions. The CSV should have columns: text, option1, option2, option3, option4, correctOption
+              </p>
+              
+              <div className="space-y-4">
+                <div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".csv"
+                    onChange={handleImportCSV}
+                    disabled={importing}
+                    className="hidden"
+                    id="csv-import"
+                  />
+                  <label htmlFor="csv-import">
+                    <span className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+                      <Upload className="h-4 w-4" />
+                      {importing ? 'Importing...' : 'Choose CSV File'}
+                    </span>
+                  </label>
+                </div>
+                
+                {importError && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+                    {importError}
+                  </div>
+                )}
+                
+                {importSuccess && (
+                  <div className="p-3 bg-green-50 border border-green-200 rounded text-green-700 text-sm">
+                    {importSuccess}
+                  </div>
+                )}
+                
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-medium text-gray-700">CSV Format:</p>
+                    <a
+                      href="/quiz-questions-template.csv"
+                      download
+                      className="text-sm text-blue-600 hover:text-blue-700 underline"
+                    >
+                      Download Template CSV
+                    </a>
+                  </div>
+                  <pre className="text-xs text-gray-600 overflow-x-auto">
+{`text,option1,option2,option3,option4,correctOption
+"What is Formula Student?","A racing competition","A university competition","A car show","A design contest","A university competition"
+"What is the maximum engine capacity?","600cc","610cc","620cc","650cc","610cc"}`}
+                  </pre>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Note: The correctOption must exactly match one of the option values (option1, option2, etc.)
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Sanity Studio Section */}
+            <div className="bg-white shadow rounded-lg p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Quiz Configuration</h2>
+              <p className="text-gray-600 mb-4">
+                To manage quiz questions, time limits, and schedule, please use Sanity Studio.
+              </p>
+              <Button onClick={() => router.push('/studio')}>
+                Open Sanity Studio
+              </Button>
             {quizConfig && (
               <div className="mt-6 space-y-4">
                 <div>
@@ -448,6 +622,7 @@ export default function QuizAdminPage() {
                 </div>
               </div>
             )}
+            </div>
           </div>
         )}
       </div>

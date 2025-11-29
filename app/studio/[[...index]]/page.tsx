@@ -154,6 +154,11 @@ export default function StudioPage() {
       } else {
         setError(data.error || 'Incorrect password. Please try again.');
         setPassword('');
+        
+        // If in development and error mentions default password, show helpful message
+        if (data.error?.includes('default password')) {
+          console.log('💡 Tip: Set STUDIO_PASSWORD in .env.local to use a custom password');
+        }
       }
     } catch (err) {
       console.error('Password submit error:', err);

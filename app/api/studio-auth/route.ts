@@ -7,6 +7,16 @@ export async function POST(request: NextRequest) {
     // Get password from environment variable (server-side only)
     const correctPassword = process.env.STUDIO_PASSWORD || 'admin';
     
+    // Debug logging (remove in production if needed)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Studio auth attempt:', {
+        hasPassword: !!password,
+        passwordLength: password?.length || 0,
+        hasEnvPassword: !!process.env.STUDIO_PASSWORD,
+        envPasswordLength: process.env.STUDIO_PASSWORD?.length || 0,
+      });
+    }
+    
     if (password === correctPassword) {
       const response = NextResponse.json({ success: true });
       
@@ -21,10 +31,24 @@ export async function POST(request: NextRequest) {
         path: '/',
       });
       
+      // Debug logging
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Studio auth successful, cookie set:', {
+          isProduction,
+          secure: isProduction,
+          path: '/',
+        });
+      }
+      
       return response;
     } else {
+      // Provide helpful error message
+      const errorMessage = process.env.NODE_ENV === 'development' && !process.env.STUDIO_PASSWORD
+        ? `Incorrect password. Since STUDIO_PASSWORD is not set, the default password is 'admin'.`
+        : 'Incorrect password. Please try again.';
+      
       return NextResponse.json(
-        { success: false, error: 'Incorrect password' },
+        { success: false, error: errorMessage },
         { status: 401 }
       );
     }

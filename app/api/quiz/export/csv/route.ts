@@ -70,8 +70,9 @@ export async function GET(request: NextRequest) {
 
     // Data rows
     firstSubmissions.forEach((submission) => {
-      const timeMinutes = Math.floor(submission.time_taken / 60);
-      const timeSeconds = submission.time_taken % 60;
+      const timeTaken = submission.time_taken || 0;
+      const timeMinutes = Math.floor(timeTaken / 60);
+      const timeSeconds = timeTaken % 60;
       const timeFormatted = `${timeMinutes}m ${timeSeconds}s`;
       
       const answersJson = JSON.stringify(submission.answers || {}).replace(/"/g, '""');
@@ -81,7 +82,7 @@ export async function GET(request: NextRequest) {
         `"${(submission.team_email || '').replace(/"/g, '""')}"`,
         submission.score || 0,
         Array.isArray(submission.questions) ? submission.questions.length : 0,
-        submission.time_taken || 0,
+        timeTaken,
         `"${timeFormatted}"`,
         `"${new Date(submission.submitted_at).toISOString()}"`,
         `"${answersJson}"`

@@ -20,7 +20,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} font-sans antialiased bg-white text-gray-900`}>
+      <body 
+        className={`${inter.variable} font-sans antialiased bg-white text-gray-900`}
+        suppressHydrationWarning
+      >
         <ConditionalLayoutWrapper>{children}</ConditionalLayoutWrapper>
       </body>
     </html>
