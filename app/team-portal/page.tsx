@@ -35,9 +35,14 @@ export default function TeamPortalPage() {
             please contact us to register your team.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="px-6 py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors">
+            <a 
+              href="https://hub.fihu.gr" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="px-6 py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors text-center"
+            >
               Log In
-            </button>
+            </a>
             <a
               href="/contact"
               className="px-6 py-3 border-2 border-gray-900 text-gray-900 font-semibold rounded-lg hover:bg-gray-50 transition-colors text-center"

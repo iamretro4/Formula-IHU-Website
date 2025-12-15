@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getEventByYear, getEventDocuments, getSchedule, getRegisteredTeams, getResults } from '@/lib/sanity.queries';
+import { getEventByYear, getEventDocuments, getSchedule, getRegisteredTeams } from '@/lib/sanity.queries';
 import { urlFor } from '@/sanity/lib/image';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -26,11 +26,10 @@ export default async function EventPage({
     notFound();
   }
 
-  const [documents, schedule, teams, results] = await Promise.all([
+  const [documents, schedule, teams] = await Promise.all([
     getEventDocuments(event._id).catch(() => []),
     getSchedule(event._id).catch(() => []),
     getRegisteredTeams(event._id).catch(() => []),
-    getResults(event._id).catch(() => []),
   ]);
 
   const formatDate = (dateString: string) => {
@@ -210,59 +209,6 @@ export default async function EventPage({
               </section>
         )}
 
-        {/* Results */}
-        {results.length > 0 ? (
-          <section className="mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-8">Results</h2>
-                <div className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden shadow-lg">
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y-2 divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Position</th>
-                          <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Team</th>
-                          <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Category</th>
-                          <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Points</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y-2 divide-gray-200">
-                        {results.slice(0, 10).map((result: any) => (
-                          <tr key={result._id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-                              {result.position}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {result.team?.name || 'Unknown'}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                              {result.category}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-                              {result.points}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-                <Link
-                  href={`/events/${year}/results`}
-                  className="mt-4 inline-block text-[#0066FF] hover:text-[#0052CC] font-bold"
-                >
-                  View Full Results →
-                </Link>
-          </section>
-        ) : (
-              <section className="mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-8">Results</h2>
-                <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl p-16 text-center border-2 border-gray-200">
-                  <div className="text-7xl mb-6">🏁</div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Results Coming Soon</h3>
-                  <p className="text-gray-700 text-lg">Competition results will be posted here after the event.</p>
-                </div>
-              </section>
-        )}
 
       </div>
     </div>

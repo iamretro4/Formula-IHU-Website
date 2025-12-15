@@ -69,6 +69,18 @@ export async function getPageContent(page: string) {
   return await client.fetch(query);
 }
 
+export async function getHomePageContent() {
+  const query = groq`*[_type == "homePage"][0] {
+    _id,
+    heroTitle,
+    heroSubtitle,
+    competitionTitle,
+    competitionDescription,
+    quickLinksTitle
+  }`;
+  return await client.fetch(query);
+}
+
 export async function getSiteSettings() {
   const query = groq`*[_type == "siteSettings"][0] {
     title,

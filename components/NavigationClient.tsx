@@ -32,7 +32,6 @@ export default function NavigationClient({ events }: NavigationClientProps) {
     { href: '/join-us', label: 'Join us' },
     { href: '/contact', label: 'Contact us' },
     { href: '/rules', label: 'Rules & Documents' },
-    { href: '/results', label: 'Results' },
     { href: '/team-portal', label: 'Team Portal' },
   ];
 
@@ -98,7 +97,7 @@ export default function NavigationClient({ events }: NavigationClientProps) {
                 >
                   <Link
                     href="/events"
-                    className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gradient-primary hover:text-white transition-all rounded-md mx-2"
+                    className="block px-4 py-2 text-sm font-medium text-gray-900 hover:bg-primary-blue hover:text-white transition-all rounded-md mx-2"
                   >
                     All Events
                   </Link>
@@ -112,7 +111,7 @@ export default function NavigationClient({ events }: NavigationClientProps) {
                         <Link
                           key={event._id}
                           href={`/events/${event.year}`}
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gradient-primary hover:text-white transition-all rounded-md mx-2"
+                          className="block px-4 py-2 text-sm text-gray-900 hover:bg-primary-blue hover:text-white transition-all rounded-md mx-2"
                         >
                           {event.title} ({event.year})
                         </Link>
@@ -129,7 +128,7 @@ export default function NavigationClient({ events }: NavigationClientProps) {
                         <Link
                           key={event._id}
                           href={`/events/${event.year}`}
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gradient-primary hover:text-white transition-all rounded-md mx-2"
+                          className="block px-4 py-2 text-sm text-gray-900 hover:bg-primary-blue hover:text-white transition-all rounded-md mx-2"
                         >
                           {event.title} ({event.year})
                         </Link>

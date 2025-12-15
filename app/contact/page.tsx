@@ -3,6 +3,19 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
+/**
+ * Contact Form
+ * 
+ * Form submissions are stored in Supabase in the 'contact_submissions' table.
+ * The table structure includes:
+ * - name: string
+ * - email: string
+ * - subject: string
+ * - message: text
+ * - created_at: timestamp (automatically set)
+ * 
+ * To view submissions, access your Supabase dashboard and query the 'contact_submissions' table.
+ */
 export default function ContactPage() {
   const [formData, setFormData] = useState({
     name: '',

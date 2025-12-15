@@ -15,14 +15,19 @@ export default function VolunteerApplicationPage() {
     interests: '',
     experience: '',
     motivation: '',
+    foodAllergies: '',
+    accommodationRequest: '',
+    technicalOperationalPreference: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const target = e.target;
+    const value = target.type === 'checkbox' ? (target as HTMLInputElement).checked : target.value;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [target.name]: value,
     });
   };
 
@@ -47,6 +52,9 @@ export default function VolunteerApplicationPage() {
             additional_data: {
               age: formData.age || null,
               interests: formData.interests || null,
+              foodAllergies: formData.foodAllergies || null,
+              accommodationRequest: formData.accommodationRequest || null,
+              technicalOperationalPreference: formData.technicalOperationalPreference || false,
             },
           },
         ]);
@@ -66,6 +74,9 @@ export default function VolunteerApplicationPage() {
           interests: '',
           experience: '',
           motivation: '',
+          foodAllergies: '',
+          accommodationRequest: '',
+          technicalOperationalPreference: false,
         });
       }
     } catch (error) {
@@ -105,7 +116,7 @@ export default function VolunteerApplicationPage() {
               />
             </div>
             <div>
-              <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
                 Last Name *
               </label>
               <input
@@ -161,7 +172,7 @@ export default function VolunteerApplicationPage() {
               required
               value={formData.age}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0066FF] focus:border-[#0066FF] bg-white text-gray-900"
             >
               <option value="">Select...</option>
               <option value="18-25">18-25</option>
@@ -184,7 +195,7 @@ export default function VolunteerApplicationPage() {
               value={formData.availability}
               onChange={handleChange}
               placeholder="Please indicate your availability for the event dates..."
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0066FF] focus:border-[#0066FF] bg-white text-gray-900"
             />
           </div>
 
@@ -200,7 +211,7 @@ export default function VolunteerApplicationPage() {
               value={formData.interests}
               onChange={handleChange}
               placeholder="e.g., Registration, Logistics, Team support, Media, Safety..."
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0066FF] focus:border-[#0066FF] bg-white text-gray-900"
             />
           </div>
 
@@ -215,7 +226,7 @@ export default function VolunteerApplicationPage() {
               value={formData.experience}
               onChange={handleChange}
               placeholder="Tell us about any previous volunteer or event experience..."
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0066FF] focus:border-[#0066FF] bg-white text-gray-900"
             />
           </div>
 
@@ -231,8 +242,52 @@ export default function VolunteerApplicationPage() {
               value={formData.motivation}
               onChange={handleChange}
               placeholder="Tell us about your motivation and what you hope to gain from this experience..."
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0066FF] focus:border-[#0066FF] bg-white text-gray-900"
             />
+          </div>
+
+          <div>
+            <label htmlFor="foodAllergies" className="block text-sm font-medium text-gray-700 mb-2">
+              Food Preferences / Allergies
+            </label>
+            <textarea
+              id="foodAllergies"
+              name="foodAllergies"
+              rows={3}
+              value={formData.foodAllergies}
+              onChange={handleChange}
+              placeholder="Please list any dietary restrictions, allergies, or food preferences..."
+              className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0066FF] focus:border-[#0066FF] bg-white text-gray-900"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="accommodationRequest" className="block text-sm font-medium text-gray-700 mb-2">
+              Accommodation Request
+            </label>
+            <textarea
+              id="accommodationRequest"
+              name="accommodationRequest"
+              rows={3}
+              value={formData.accommodationRequest}
+              onChange={handleChange}
+              placeholder="Do you need accommodation? Please provide any special requirements..."
+              className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0066FF] focus:border-[#0066FF] bg-white text-gray-900"
+            />
+          </div>
+
+          <div className="flex items-start">
+            <input
+              type="checkbox"
+              id="technicalOperationalPreference"
+              name="technicalOperationalPreference"
+              checked={formData.technicalOperationalPreference}
+              onChange={handleChange}
+              className="mt-1 h-4 w-4 text-[#0066FF] focus:ring-[#0066FF] border-gray-300 rounded"
+            />
+            <label htmlFor="technicalOperationalPreference" className="ml-2 block text-sm font-medium text-gray-700">
+              I prefer Technical/Operational roles
+            </label>
           </div>
 
           <button

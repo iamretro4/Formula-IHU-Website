@@ -19,6 +19,9 @@ export default async function AboutPage() {
               Formula IHU is the official Formula Student Competition held in Greece, 
               part of the Formula Student World Series.
             </p>
+            <p className="text-base mb-6 text-gray-600 italic">
+              Organized by International Hellenic University
+            </p>
             <h2 className="text-2xl font-semibold text-gray-900 mb-4 mt-8">
               What is Formula Student?
             </h2>

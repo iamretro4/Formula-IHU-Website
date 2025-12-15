@@ -2,7 +2,7 @@ import Hero from '@/components/Hero';
 import NewsSection from '@/components/NewsSection';
 import DocumentCard from '@/components/DocumentCard';
 import StatisticsSection from '@/components/StatisticsSection';
-import { getFeaturedNews, getDocuments } from '@/lib/sanity.queries';
+import { getFeaturedNews, getDocuments, getHomePageContent } from '@/lib/sanity.queries';
 import Link from 'next/link';
 import { ArrowRight, FileText, Users, Mail } from 'lucide-react';
 
@@ -16,6 +16,7 @@ export default async function Home() {
   const featuredDocs = await getDocuments().then(docs => 
     docs.filter((doc: any) => doc.isFeatured).slice(0, 3)
   ).catch(() => []);
+  const homePageContent = await getHomePageContent().catch(() => null);
 
   return (
     <div className="flex flex-col">
@@ -26,12 +27,10 @@ export default async function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Formula IHU 2025
+              {homePageContent?.competitionTitle || 'Formula IHU 2025'}
             </h2>
             <p className="text-xl md:text-2xl text-gray-700 max-w-4xl mx-auto leading-relaxed">
-              Formula IHU 2025 will take place from August 26 to 31 at Serres Racing Circuit. 
-              University teams from around the world design, build and race formula-style cars 
-              in an international competition where engineering meets real-world challenge.
+              {homePageContent?.competitionDescription || 'Formula IHU 2025 will take place from August 26 to 31 at Serres Racing Circuit. University teams from around the world design, build and race formula-style cars in an international competition where engineering meets real-world challenge.'}
             </p>
           </div>
         </div>
@@ -72,7 +71,7 @@ export default async function Home() {
       {/* Quick Links */}
       <section className="py-24 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl font-bold text-gray-900 mb-12 text-center">Quick Links</h2>
+          <h2 className="text-4xl font-bold text-gray-900 mb-12 text-center">{homePageContent?.quickLinksTitle || 'Quick Links'}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Link
               href="/about"

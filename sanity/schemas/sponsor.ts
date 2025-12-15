@@ -31,11 +31,12 @@ export default defineType({
       type: 'string',
       options: {
         list: [
-          { title: 'Platinum', value: 'platinum' },
-          { title: 'Gold', value: 'gold' },
-          { title: 'Silver', value: 'silver' },
-          { title: 'Bronze', value: 'bronze' },
-          { title: 'Partner', value: 'partner' },
+          { title: 'Title Partner', value: 'title-partner' },
+          { title: 'Premium Partner', value: 'premium-partner' },
+          { title: 'Gold Partner', value: 'gold-partner' },
+          { title: 'Silver Partner', value: 'silver-partner' },
+          { title: 'Bronze Partner', value: 'bronze-partner' },
+          { title: 'Supporter', value: 'supporter' },
         ],
       },
       validation: (Rule) => Rule.required(),

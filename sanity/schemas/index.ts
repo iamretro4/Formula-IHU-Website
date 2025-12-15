@@ -10,6 +10,7 @@ import statistic from './statistic';
 import scheduleItem from './scheduleItem';
 import team from './team';
 import registrationQuiz from './registrationQuiz';
+import homePage from './homePage';
 
 export const schemaTypes = [
   news,
@@ -24,5 +25,6 @@ export const schemaTypes = [
   scheduleItem,
   team,
   registrationQuiz,
+  homePage,
 ];
 

@@ -3,13 +3,14 @@ import { urlFor } from '@/lib/sanity';
 import Image from 'next/image';
 import Link from 'next/link';
 
-const tierOrder = ['platinum', 'gold', 'silver', 'bronze', 'partner'];
+const tierOrder = ['title-partner', 'premium-partner', 'gold-partner', 'silver-partner', 'bronze-partner', 'supporter'];
 const tierLabels: Record<string, string> = {
-  platinum: 'Platinum Sponsors',
-  gold: 'Gold Sponsors',
-  silver: 'Silver Sponsors',
-  bronze: 'Bronze Sponsors',
-  partner: 'Partners',
+  'title-partner': 'Title Partner',
+  'premium-partner': 'Premium Partner',
+  'gold-partner': 'Gold Partner',
+  'silver-partner': 'Silver Partner',
+  'bronze-partner': 'Bronze Partner',
+  'supporter': 'Supporter',
 };
 
 // Revalidate this page every 60 seconds (fallback if webhook fails)
