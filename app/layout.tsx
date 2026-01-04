@@ -12,8 +12,12 @@ export const metadata: Metadata = {
   title: "Formula IHU - Engineering the future, one lap at a time!",
   description: "Formula IHU is the official Formula Student Competition held in Greece, part of Formula Student World Series.",
   icons: {
-    icon: '/logo.png',
+    icon: [
+      { url: '/logo.png', sizes: 'any' },
+      { url: '/logo.png', type: 'image/png' },
+    ],
     apple: '/logo.png',
+    shortcut: '/logo.png',
   },
 };
 

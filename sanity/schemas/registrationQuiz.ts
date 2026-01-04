@@ -64,6 +64,20 @@ export default defineType({
                 hotspot: true,
               },
             },
+            {
+              name: 'category',
+              title: 'Question Category',
+              type: 'string',
+              description: 'Which vehicle category this question applies to',
+              options: {
+                list: [
+                  { title: 'Common (Both EV and CV)', value: 'common' },
+                  { title: 'Electric Vehicle (EV) Only', value: 'EV' },
+                  { title: 'Combustion Vehicle (CV) Only', value: 'CV' },
+                ],
+              },
+              initialValue: 'common',
+            },
           ],
           preview: {
             select: {

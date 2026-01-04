@@ -5,6 +5,7 @@ export interface Question {
   options: string[];
   correctOption: string;
   image?: string | null; // Optional image URL
+  category?: 'common' | 'EV' | 'CV'; // Question category
 }
 
 export interface QuizData {
@@ -18,6 +19,10 @@ export interface QuizData {
 export interface TeamInfo {
   name: string;
   email: string;
+  vehicleCategory?: 'EV' | 'CV'; // Vehicle category selected by team
+  preferredTeamNumber?: string;
+  alternativeTeamNumber?: string;
+  fuelType?: string; // Only for CV teams
 }
 
 export interface Answers {

@@ -19,8 +19,16 @@ const QuizView: React.FC<QuizViewProps> = ({ questions, answers, setAnswers, onS
     });
   };
   
+  // Filter questions based on vehicle category
+  const filteredQuestions = React.useMemo(() => {
+    if (!teamInfo.vehicleCategory) return questions;
+    return questions.filter(q => 
+      !q.category || q.category === 'common' || q.category === teamInfo.vehicleCategory
+    );
+  }, [questions, teamInfo.vehicleCategory]);
+  
   // Allow submission even if some questions have "NO_ANSWER"
-  const allQuestionsAnswered = questions.every(q => answers[q.id] !== undefined);
+  const allQuestionsAnswered = filteredQuestions.every(q => answers[q.id] !== undefined);
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -38,7 +46,7 @@ const QuizView: React.FC<QuizViewProps> = ({ questions, answers, setAnswers, onS
         </div>
       
       <div className="space-y-6">
-        {questions.map((q, index) => (
+        {filteredQuestions.map((q, index) => (
           <div key={q.id} className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
             <p className="text-lg font-semibold text-gray-800 mb-4">
               <span className="text-blue-600 font-bold mr-2">Q{index + 1}.</span>

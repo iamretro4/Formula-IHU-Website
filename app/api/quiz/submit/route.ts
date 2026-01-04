@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { teamName, teamEmail, answers, timeTaken, score, questions } = body;
+    const { teamName, teamEmail, vehicleCategory, preferredTeamNumber, alternativeTeamNumber, fuelType, answers, timeTaken, score, questions } = body;
 
     if (!teamName || !teamEmail || !answers) {
       return NextResponse.json(
@@ -101,6 +101,10 @@ export async function POST(request: NextRequest) {
         {
           team_name: teamName,
           team_email: teamEmail,
+          vehicle_category: vehicleCategory,
+          preferred_team_number: preferredTeamNumber,
+          alternative_team_number: alternativeTeamNumber,
+          fuel_type: fuelType,
           time_taken: timeTaken,
           score: score,
           questions: questions,

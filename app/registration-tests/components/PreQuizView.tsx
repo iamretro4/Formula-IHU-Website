@@ -16,7 +16,7 @@ const PreQuizView: React.FC<PreQuizViewProps> = ({ teamInfo, setTeamInfo, onStar
     setTeamInfo({ ...teamInfo, [name]: value });
   };
 
-  const canStart = teamInfo.name.trim() !== '' && teamInfo.email.trim() !== '';
+  const canStart = teamInfo.name.trim() !== '' && teamInfo.email.trim() !== '' && teamInfo.vehicleCategory;
   
   return (
     <div className="max-w-2xl mx-auto">
@@ -58,6 +58,22 @@ const PreQuizView: React.FC<PreQuizViewProps> = ({ teamInfo, setTeamInfo, onStar
               placeholder="e.g., contact@your-team.com"
               required
             />
+          </div>
+          <div>
+            <label htmlFor="vehicleCategory" className="block text-sm font-medium text-gray-700">Vehicle Category *</label>
+            <select
+              name="vehicleCategory"
+              id="vehicleCategory"
+              value={teamInfo.vehicleCategory || ''}
+              onChange={(e) => setTeamInfo({ ...teamInfo, vehicleCategory: e.target.value as 'EV' | 'CV' })}
+              className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              required
+            >
+              <option value="">Select vehicle category</option>
+              <option value="EV">Electric Vehicle (EV)</option>
+              <option value="CV">Combustion Vehicle (CV)</option>
+            </select>
+            <p className="mt-1 text-xs text-gray-500">Select the category of vehicle your team will compete with</p>
           </div>
         </form>
 

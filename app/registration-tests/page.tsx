@@ -6,6 +6,7 @@ import { useQuizTimer } from './hooks/useQuizTimer';
 import Header from './components/Header';
 import PreQuizView from './components/PreQuizView';
 import QuizView from './components/QuizView';
+import EndQuizForm from './components/EndQuizForm';
 import ResultsView from './components/ResultsView';
 import LoadingSpinner from './components/LoadingSpinner';
 
@@ -21,7 +22,7 @@ export default function RegistrationTestsPage() {
   const [teamInfo, setTeamInfo] = useState<TeamInfo>({ name: '', email: '' });
   const [answers, setAnswers] = useState<Answers>({});
   const [score, setScore] = useState<number | null>(null);
-  const [appState, setAppState] = useState<'loading' | 'waiting' | 'ready' | 'active' | 'submitted'>('loading');
+  const [appState, setAppState] = useState<'loading' | 'waiting' | 'ready' | 'active' | 'endForm' | 'submitted'>('loading');
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [endTime, setEndTime] = useState<Date | null>(null);
   const [timeTaken, setTimeTaken] = useState<number | null>(null);
@@ -205,7 +206,10 @@ export default function RegistrationTestsPage() {
 
       // Save to localStorage immediately (fast, local)
       localStorage.setItem('quiz_progress', JSON.stringify({
-        teamInfo,
+        teamInfo: {
+          ...teamInfo,
+          vehicleCategory: teamInfo.vehicleCategory, // Ensure vehicle category is saved
+        },
         answers,
         startTime: startTime.toISOString(),
       }));
@@ -274,7 +278,18 @@ export default function RegistrationTestsPage() {
   );
 
   const handleStart = useCallback(() => {
-    if (!quizData) return;
+    if (!quizData || !teamInfo.vehicleCategory) return;
+    
+    // Filter questions based on vehicle category
+    const filteredQuestions = quizData.questions.filter((q: any) => 
+      !q.category || q.category === 'common' || q.category === teamInfo.vehicleCategory
+    );
+    
+    // Update quiz data with filtered questions
+    setQuizData({
+      ...quizData,
+      questions: filteredQuestions,
+    });
     
     const now = new Date();
     // Use fixed 2 hours from global start time, not from individual start
@@ -309,14 +324,24 @@ export default function RegistrationTestsPage() {
     return correctCount;
   }, []);
 
+  const handleQuizComplete = useCallback(() => {
+    // Move to end form instead of submitting directly
+    setAppState('endForm');
+  }, []);
+
   const handleSubmission = useCallback(async () => {
-    if (!quizData || !startTime || alreadySubmitted) return;
+    if (!quizData || !startTime || alreadySubmitted || !teamInfo.vehicleCategory) return;
+    
+    // Filter questions to match what the team actually answered
+    const filteredQuestions = quizData.questions.filter((q: any) => 
+      !q.category || q.category === 'common' || q.category === teamInfo.vehicleCategory
+    );
     
     const submitTime = new Date();
     const timeDiff = Math.floor((submitTime.getTime() - startTime.getTime()) / 1000);
     setTimeTaken(timeDiff);
     
-    const finalScore = calculateScore(answers, quizData.questions);
+    const finalScore = calculateScore(answers, filteredQuestions);
     setScore(finalScore);
 
     // Submit to API FIRST, then update UI
@@ -327,10 +352,14 @@ export default function RegistrationTestsPage() {
         body: JSON.stringify({
           teamName: teamInfo.name,
           teamEmail: teamInfo.email,
+          vehicleCategory: teamInfo.vehicleCategory,
+          preferredTeamNumber: teamInfo.preferredTeamNumber,
+          alternativeTeamNumber: teamInfo.alternativeTeamNumber,
+          fuelType: teamInfo.fuelType,
           answers,
           timeTaken: timeDiff,
           score: finalScore,
-          questions: quizData.questions.map(q => ({
+          questions: filteredQuestions.map(q => ({
             id: q.id,
             text: q.text,
             options: q.options,
@@ -424,7 +453,7 @@ export default function RegistrationTestsPage() {
             teamName: teamInfo.name,
             teamEmail: teamInfo.email,
             timeTaken: actualTimeTaken, // Use the actual time from database
-            questions: quizData.questions.map(q => ({
+            questions: filteredQuestions.map(q => ({
               id: q.id,
               text: q.text,
               options: q.options,
@@ -447,13 +476,13 @@ export default function RegistrationTestsPage() {
       // Don't set submitted state on error
       // Don't send email if submission failed
     }
-  }, [answers, quizData, startTime, teamInfo, alreadySubmitted, calculateScore]);
+  }, [answers, quizData, startTime, teamInfo, alreadySubmitted, calculateScore, handleQuizComplete]);
 
   useEffect(() => {
     if (quizStatus === QuizStatus.FINISHED && appState === 'active') {
-      handleSubmission();
+      handleQuizComplete();
     }
-  }, [quizStatus, appState, handleSubmission]);
+  }, [quizStatus, appState, handleQuizComplete]);
 
   const renderContent = () => {
     if (appState === 'loading') {
@@ -551,8 +580,18 @@ export default function RegistrationTestsPage() {
           questions={quizData.questions}
           answers={answers}
           setAnswers={setAnswers}
-          onSubmit={handleSubmission}
+          onSubmit={handleQuizComplete}
           teamInfo={teamInfo}
+        />
+      );
+    }
+
+    if (appState === 'endForm') {
+      return (
+        <EndQuizForm
+          teamInfo={teamInfo}
+          setTeamInfo={setTeamInfo}
+          onSubmit={handleSubmission}
         />
       );
     }

@@ -25,6 +25,7 @@ export async function GET() {
         text,
         options,
         correctOption,
+        category,
         image {
           asset-> {
             _id,
@@ -60,6 +61,7 @@ export async function GET() {
       options: q.options || [],
       correctOption: q.correctOption,
       image: q.image?.asset?.url || null,
+      category: q.category || 'common',
     }));
 
     return NextResponse.json({
