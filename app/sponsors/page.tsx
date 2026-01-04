@@ -1,5 +1,5 @@
 import { getSponsors } from '@/lib/sanity.queries';
-import { urlFor } from '@/lib/sanity';
+import { urlFor } from '@/sanity/lib/image';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -11,6 +11,7 @@ const tierLabels: Record<string, string> = {
   'silver-partner': 'Silver Partner',
   'bronze-partner': 'Bronze Partner',
   'supporter': 'Supporter',
+  'platinum': 'Organized By', // Handle legacy tier
 };
 
 // Revalidate this page every 60 seconds (fallback if webhook fails)
@@ -24,6 +25,12 @@ export default async function SponsorsPage() {
     acc[tier] = sponsors.filter((s: any) => s.tier === tier);
     return acc;
   }, {} as Record<string, any[]>);
+  
+  // Handle legacy "platinum" tier (Organized By)
+  const organizedBy = sponsors.filter((s: any) => s.tier === 'platinum');
+  if (organizedBy.length > 0) {
+    sponsorsByTier['platinum'] = organizedBy;
+  }
 
   return (
     <div className="bg-white">
@@ -39,6 +46,48 @@ export default async function SponsorsPage() {
           </div>
         ) : (
           <div className="space-y-16">
+            {/* Show Organized By first if exists */}
+            {sponsorsByTier['platinum'] && sponsorsByTier['platinum'].length > 0 && (
+              <div>
+                <h2 className="text-2xl font-semibold text-gray-900 mb-8 border-b border-gray-200 pb-2">
+                  Organized By
+                </h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                  {sponsorsByTier['platinum'].map((sponsor: any) => (
+                    <div
+                      key={sponsor._id}
+                      className="flex flex-col items-center justify-center p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all transform hover:scale-105"
+                    >
+                      {sponsor.logo ? (
+                        <a
+                          href={sponsor.website || '#'}
+                          target={sponsor.website ? '_blank' : undefined}
+                          rel={sponsor.website ? 'noopener noreferrer' : undefined}
+                          className="w-full h-32 flex items-center justify-center"
+                        >
+                          <Image
+                            src={urlFor(sponsor.logo).width(200).height(120).url()}
+                            alt={sponsor.name}
+                            width={200}
+                            height={120}
+                            className="object-contain max-h-32"
+                          />
+                        </a>
+                      ) : (
+                        <div className="w-full h-32 flex items-center justify-center text-gray-400">
+                          {sponsor.name}
+                        </div>
+                      )}
+                      {sponsor.name && (
+                        <p className="mt-4 text-sm font-medium text-gray-700 text-center">
+                          {sponsor.name}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             {tierOrder.map((tier) => {
               const tierSponsors = sponsorsByTier[tier];
               if (!tierSponsors || tierSponsors.length === 0) return null;

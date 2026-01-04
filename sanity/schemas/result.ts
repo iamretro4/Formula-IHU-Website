@@ -14,7 +14,7 @@ export default defineType({
     }),
     defineField({
       name: 'category',
-      title: 'Category',
+      title: 'Vehicle Category',
       type: 'string',
       options: {
         list: [
@@ -24,6 +24,37 @@ export default defineType({
         ],
       },
       validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: 'subcategory',
+      title: 'Result Subcategory',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Overall', value: 'overall' },
+          { title: 'Engineering Design', value: 'engineering-design' },
+          { title: 'Cost & Manufacturing', value: 'cost-manufacturing' },
+          { title: 'Business Plan', value: 'business-plan' },
+          { title: 'Acceleration', value: 'acceleration' },
+          { title: 'Skidpad', value: 'skidpad' },
+          { title: 'Autocross', value: 'autocross' },
+          { title: 'Endurance', value: 'endurance' },
+          { title: 'Efficiency', value: 'efficiency' },
+        ],
+      },
+      description: 'The specific category of this result (e.g., Overall, Engineering Design, etc.)',
+    }),
+    defineField({
+      name: 'vehicleNumber',
+      title: 'Vehicle Number',
+      type: 'string',
+      description: 'The vehicle number (e.g., E88, C12)',
+    }),
+    defineField({
+      name: 'penalties',
+      title: 'Penalties',
+      type: 'number',
+      description: 'Penalty points (if applicable)',
     }),
     defineField({
       name: 'team',

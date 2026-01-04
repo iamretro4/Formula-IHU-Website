@@ -36,10 +36,9 @@ export default function StatisticsSectionClient({ statistics }: StatisticsSectio
 
   // Use provided statistics or fallback to defaults
   const stats = statistics.length > 0 ? statistics : [
-    { _id: '1', icon: 'trophy', value: 50, suffix: '+', label: 'Teams', description: 'Competing annually' },
-    { _id: '2', icon: 'users', value: 500, suffix: '+', label: 'Participants', description: 'Students involved' },
-    { _id: '3', icon: 'car', value: 10, suffix: '+', label: 'Countries', description: 'International reach' },
-    { _id: '4', icon: 'flag', value: 5, suffix: '+', label: 'Events', description: 'Years running' },
+    { _id: '1', icon: 'trophy', value: 10, suffix: '+', label: 'Teams', description: 'Competing annually' },
+    { _id: '2', icon: 'users', value: 300, suffix: '+', label: 'Participants', description: 'Students involved' },
+    { _id: '3', icon: 'car', value: 4, suffix: '+', label: 'Countries', description: 'International reach' },
   ];
 
   return (
@@ -51,7 +50,7 @@ export default function StatisticsSectionClient({ statistics }: StatisticsSectio
       <div className="absolute inset-0 racing-stripe opacity-5"></div>
       
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {stats.map((stat, index) => {
             const Icon = iconMap[stat.icon] || Trophy;
             return (

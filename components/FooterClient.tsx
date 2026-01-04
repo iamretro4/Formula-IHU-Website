@@ -5,10 +5,40 @@ import { Instagram, Linkedin, Mail, MapPin } from 'lucide-react';
 
 interface FooterClientProps {
   events: any[];
+  siteSettings?: any;
 }
 
-export default function FooterClient({ events }: FooterClientProps) {
+export default function FooterClient({ events, siteSettings }: FooterClientProps) {
   const recentEvents = events.slice(0, 5);
+  
+  // Get footer data from Sanity with fallbacks
+  const footerDescription = siteSettings?.footer?.description || 
+    'Formula IHU is the official Formula Student Competition held in Greece, part of Formula Student World Series.';
+  
+  const quickLinks = siteSettings?.footer?.quickLinks || [
+    { label: 'About', url: '/about' },
+    { label: 'Events', url: '/events' },
+    { label: 'Sponsors', url: '/sponsors' },
+    { label: 'Results', url: '/results' },
+    { label: 'Contact', url: '/contact' },
+  ];
+  
+  const joinUsLinks = siteSettings?.footer?.joinUsLinks || [
+    { label: 'Become a judge', url: '/join-us' },
+    { label: 'Become a scrutineer', url: '/join-us' },
+    { label: 'Become a volunteer', url: '/join-us' },
+  ];
+  
+  const socialLinks = siteSettings?.social || {
+    instagram: 'https://www.instagram.com',
+    linkedin: 'https://www.linkedin.com',
+  };
+  
+  const contact = siteSettings?.contact || {
+    address: 'Thessaloniki, Greece',
+    email: 'info.formulaihu@ihu.gr',
+    technicalEmail: 'technical.formulaihu@ihu.gr',
+  };
 
   return (
     <footer className="bg-gray-900 text-gray-300 border-t-2 border-gray-800 relative overflow-hidden">
@@ -21,61 +51,52 @@ export default function FooterClient({ events }: FooterClientProps) {
           <div>
             <h3 className="text-xl font-bold text-white mb-4">Formula IHU</h3>
             <p className="text-sm mb-6 leading-relaxed">
-              Formula IHU is the official Formula Student Competition held in Greece, part of Formula Student World Series.
+              {footerDescription}
             </p>
             <div className="flex gap-4">
-              <a
-                href="https://www.instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white hover:bg-primary-blue transition-all transform hover:scale-110"
-                aria-label="Instagram"
-              >
-                <Instagram className="w-5 h-5" />
-              </a>
-              <a
-                href="https://www.linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white hover:bg-primary-blue transition-all transform hover:scale-110"
-                aria-label="LinkedIn"
-              >
-                <Linkedin className="w-5 h-5" />
-              </a>
+              {socialLinks.instagram && (
+                <a
+                  href={socialLinks.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white hover:bg-primary-blue transition-all transform hover:scale-110"
+                  aria-label="Instagram"
+                >
+                  <Instagram className="w-5 h-5" />
+                </a>
+              )}
+              {socialLinks.linkedin && (
+                <a
+                  href={socialLinks.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white hover:bg-primary-blue transition-all transform hover:scale-110"
+                  aria-label="LinkedIn"
+                >
+                  <Linkedin className="w-5 h-5" />
+                </a>
+              )}
             </div>
           </div>
 
           {/* Quick Links */}
-          <div>
-            <h3 className="text-lg font-semibold text-white mb-4">Quick Links</h3>
-            <ul className="space-y-3 text-sm">
-              <li>
-                <Link href="/about" className="hover:text-white hover:translate-x-1 inline-block transition-all">
-                  About
-                </Link>
-              </li>
-              <li>
-                <Link href="/events" className="hover:text-white hover:translate-x-1 inline-block transition-all">
-                  Events
-                </Link>
-              </li>
-              <li>
-                <Link href="/sponsors" className="hover:text-white hover:translate-x-1 inline-block transition-all">
-                  Sponsors
-                </Link>
-              </li>
-              <li>
-                <Link href="/results" className="hover:text-white hover:translate-x-1 inline-block transition-all">
-                  Results
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="hover:text-white hover:translate-x-1 inline-block transition-all">
-                  Contact
-                </Link>
-              </li>
-            </ul>
-          </div>
+          {quickLinks.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-4">Quick Links</h3>
+              <ul className="space-y-3 text-sm">
+                {quickLinks.map((link: any, index: number) => (
+                  <li key={index}>
+                    <Link 
+                      href={link.url} 
+                      className="hover:text-white hover:translate-x-1 inline-block transition-all"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {/* Events */}
           <div>
@@ -100,48 +121,53 @@ export default function FooterClient({ events }: FooterClientProps) {
 
           {/* Join Us & Contact */}
           <div>
-            <h3 className="text-lg font-semibold text-white mb-4">Join Us</h3>
-            <ul className="space-y-3 text-sm mb-6">
-              <li>
-                <Link href="/join-us" className="hover:text-white hover:translate-x-1 inline-block transition-all">
-                  Become a judge
-                </Link>
-              </li>
-              <li>
-                <Link href="/join-us" className="hover:text-white hover:translate-x-1 inline-block transition-all">
-                  Become a scrutineer
-                </Link>
-              </li>
-              <li>
-                <Link href="/join-us" className="hover:text-white hover:translate-x-1 inline-block transition-all">
-                  Become a volunteer
-                </Link>
-              </li>
-            </ul>
+            {joinUsLinks.length > 0 && (
+              <>
+                <h3 className="text-lg font-semibold text-white mb-4">Join Us</h3>
+                <ul className="space-y-3 text-sm mb-6">
+                  {joinUsLinks.map((link: any, index: number) => (
+                    <li key={index}>
+                      <Link 
+                        href={link.url} 
+                        className="hover:text-white hover:translate-x-1 inline-block transition-all"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
             <h3 className="text-lg font-semibold text-white mb-4">Contact</h3>
             <ul className="space-y-3 text-sm">
-              <li className="flex items-center gap-2 text-gray-400">
-                <MapPin className="w-4 h-4 text-primary-blue" />
-                <span>Thessaloniki, Greece</span>
-              </li>
-              <li>
-                <a
-                  href="mailto:info.formulaihu@ihu.gr"
-                  className="flex items-center gap-2 hover:text-white transition-all group"
-                >
-                  <Mail className="w-4 h-4 text-primary-blue group-hover:translate-x-0.5 transition-transform" />
-                  <span>info.formulaihu@ihu.gr</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="mailto:technical.formulaihu@ihu.gr"
-                  className="flex items-center gap-2 hover:text-white transition-all group"
-                >
-                  <Mail className="w-4 h-4 text-primary-blue group-hover:translate-x-0.5 transition-transform" />
-                  <span>technical.formulaihu@ihu.gr</span>
-                </a>
-              </li>
+              {contact.address && (
+                <li className="flex items-center gap-2 text-gray-400">
+                  <MapPin className="w-4 h-4 text-primary-blue" />
+                  <span>{contact.address}</span>
+                </li>
+              )}
+              {contact.email && (
+                <li>
+                  <a
+                    href={`mailto:${contact.email}`}
+                    className="flex items-center gap-2 hover:text-white transition-all group"
+                  >
+                    <Mail className="w-4 h-4 text-primary-blue group-hover:translate-x-0.5 transition-transform" />
+                    <span>{contact.email}</span>
+                  </a>
+                </li>
+              )}
+              {contact.technicalEmail && (
+                <li>
+                  <a
+                    href={`mailto:${contact.technicalEmail}`}
+                    className="flex items-center gap-2 hover:text-white transition-all group"
+                  >
+                    <Mail className="w-4 h-4 text-primary-blue group-hover:translate-x-0.5 transition-transform" />
+                    <span>{contact.technicalEmail}</span>
+                  </a>
+                </li>
+              )}
             </ul>
           </div>
         </div>

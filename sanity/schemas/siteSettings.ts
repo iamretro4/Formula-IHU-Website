@@ -56,6 +56,80 @@ export default defineType({
         },
       ],
     }),
+    defineField({
+      name: 'footer',
+      title: 'Footer Settings',
+      type: 'object',
+      fields: [
+        {
+          name: 'description',
+          title: 'Footer Description',
+          type: 'text',
+          rows: 3,
+          description: 'Description text shown in the footer',
+        },
+        {
+          name: 'quickLinks',
+          title: 'Quick Links',
+          type: 'array',
+          of: [
+            {
+              type: 'object',
+              fields: [
+                {
+                  name: 'label',
+                  title: 'Link Label',
+                  type: 'string',
+                  validation: (Rule: any) => Rule.required(),
+                },
+                {
+                  name: 'url',
+                  title: 'Link URL',
+                  type: 'string',
+                  validation: (Rule: any) => Rule.required(),
+                },
+              ],
+              preview: {
+                select: {
+                  title: 'label',
+                  subtitle: 'url',
+                },
+              },
+            },
+          ],
+        },
+        {
+          name: 'joinUsLinks',
+          title: 'Join Us Links',
+          type: 'array',
+          of: [
+            {
+              type: 'object',
+              fields: [
+                {
+                  name: 'label',
+                  title: 'Link Label',
+                  type: 'string',
+                  validation: (Rule: any) => Rule.required(),
+                },
+                {
+                  name: 'url',
+                  title: 'Link URL',
+                  type: 'string',
+                  validation: (Rule: any) => Rule.required(),
+                },
+              ],
+              preview: {
+                select: {
+                  title: 'label',
+                  subtitle: 'url',
+                },
+              },
+            },
+          ],
+        },
+      ],
+    }),
   ],
   preview: {
     select: {

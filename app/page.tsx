@@ -2,7 +2,7 @@ import Hero from '@/components/Hero';
 import NewsSection from '@/components/NewsSection';
 import DocumentCard from '@/components/DocumentCard';
 import StatisticsSection from '@/components/StatisticsSection';
-import { getFeaturedNews, getDocuments, getHomePageContent } from '@/lib/sanity.queries';
+import { getFeaturedNews, getDocuments, getHomePageContent, getEvents } from '@/lib/sanity.queries';
 import Link from 'next/link';
 import { ArrowRight, FileText, Users, Mail } from 'lucide-react';
 
@@ -14,9 +14,70 @@ export default async function Home() {
   // For now, these will return empty arrays if CMS is not set up
   const featuredNews = await getFeaturedNews().catch(() => []);
   const featuredDocs = await getDocuments().then(docs => 
-    docs.filter((doc: any) => doc.isFeatured).slice(0, 3)
+    docs
+      .filter((doc: any) => doc.isFeatured)
+      .filter((doc: any) => doc.category !== 'handbook' && doc.category !== 'event-handbook')
+      .slice(0, 3)
   ).catch(() => []);
   const homePageContent = await getHomePageContent().catch(() => null);
+  
+  // Get the next upcoming competition
+  const allEvents = await getEvents().catch(() => []);
+  const now = new Date();
+  
+  // Find the next upcoming event
+  // Priority 1: Current/upcoming events that haven't ended yet
+  // Priority 2: Any event that starts in the future (in case status wasn't updated)
+  const nextEvent = (() => {
+    // First, try to find current/upcoming events that haven't ended
+    const activeEvents = allEvents
+      .filter((event: any) => {
+        if (!event.startDate || !event.endDate) return false;
+        const endDate = new Date(event.endDate);
+        return (event.status === 'current' || event.status === 'upcoming') && endDate >= now;
+      })
+      .sort((a: any, b: any) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+    
+    if (activeEvents.length > 0) {
+      return activeEvents[0];
+    }
+    
+    // Fallback: find the next event by start date (even if status is past, in case status wasn't updated)
+    const futureEvents = allEvents
+      .filter((event: any) => {
+        if (!event.startDate) return false;
+        return new Date(event.startDate) > now;
+      })
+      .sort((a: any, b: any) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+    
+    return futureEvents[0] || null;
+  })();
+  
+  // Format dates for display
+  const formatDateRange = (startDate: string, endDate: string) => {
+    if (!startDate || !endDate) return '';
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const startMonth = start.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+    const endDay = end.toLocaleDateString('en-US', { day: 'numeric' });
+    const year = start.getFullYear();
+    
+    // If same month, show "August 26 to 31"
+    if (start.getMonth() === end.getMonth()) {
+      return `${startMonth} to ${endDay}, ${year}`;
+    }
+    // Different months: "August 26 to September 5, 2025"
+    return `${start.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} to ${end.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}, ${year}`;
+  };
+  
+  // Get competition title and description
+  const competitionTitle = nextEvent 
+    ? nextEvent.title || `Formula IHU ${nextEvent.year}`
+    : homePageContent?.competitionTitle || 'Formula IHU 2025';
+  
+  const competitionDescription = nextEvent
+    ? `Formula IHU ${nextEvent.year} will take place from ${formatDateRange(nextEvent.startDate, nextEvent.endDate)} at ${nextEvent.venue || nextEvent.location || 'Serres Racing Circuit'}. University teams from around the world design, build and race formula-style cars in an international competition where engineering meets real-world challenge.`
+    : homePageContent?.competitionDescription || 'Formula IHU 2025 will take place from August 26 to 31 at Serres Racing Circuit. University teams from around the world design, build and race formula-style cars in an international competition where engineering meets real-world challenge.';
 
   return (
     <div className="flex flex-col">
@@ -27,10 +88,10 @@ export default async function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              {homePageContent?.competitionTitle || 'Formula IHU 2025'}
+              {competitionTitle}
             </h2>
             <p className="text-xl md:text-2xl text-gray-700 max-w-4xl mx-auto leading-relaxed">
-              {homePageContent?.competitionDescription || 'Formula IHU 2025 will take place from August 26 to 31 at Serres Racing Circuit. University teams from around the world design, build and race formula-style cars in an international competition where engineering meets real-world challenge.'}
+              {competitionDescription}
             </p>
           </div>
         </div>

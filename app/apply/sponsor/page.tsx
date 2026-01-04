@@ -66,6 +66,35 @@ export default function SponsorApplicationPage() {
         console.error('Error submitting application:', error);
         setSubmitStatus('error');
       } else {
+        // Send email notification
+        try {
+          await fetch('/api/send-form-notification', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              formType: 'sponsor',
+              formData: {
+                'Company Name': formData.companyName,
+                'Contact Name': formData.contactName,
+                'Email': formData.email,
+                'Phone': formData.phone,
+                'Website': formData.website,
+                'Industry': formData.industry,
+                'Sponsorship Tier': formData.sponsorshipTier,
+                'Budget': formData.budget,
+                'Objectives': formData.objectives,
+                'Benefits': formData.benefits,
+                'Additional Info': formData.additionalInfo,
+              },
+            }),
+          });
+        } catch (emailError) {
+          console.error('Error sending notification email:', emailError);
+          // Don't fail the form submission if email fails
+        }
+
         setSubmitStatus('success');
         setFormData({
           companyName: '',
@@ -117,7 +146,7 @@ export default function SponsorApplicationPage() {
               required
               value={formData.companyName}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-primary-blue text-white rounded-lg border-0 focus:ring-2 focus:ring-primary-blue-light focus:outline-none placeholder:text-white/60"
+              className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-primary-blue bg-white text-gray-900 focus:outline-none"
             />
           </div>
 
@@ -132,7 +161,7 @@ export default function SponsorApplicationPage() {
               required
               value={formData.contactName}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-primary-blue text-white rounded-lg border-0 focus:ring-2 focus:ring-primary-blue-light focus:outline-none placeholder:text-white/60"
+              className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-primary-blue bg-white text-gray-900 focus:outline-none"
             />
           </div>
 
@@ -178,7 +207,7 @@ export default function SponsorApplicationPage() {
               value={formData.website}
               onChange={handleChange}
               placeholder="https://..."
-              className="w-full px-4 py-3 bg-primary-blue text-white rounded-lg border-0 focus:ring-2 focus:ring-primary-blue-light focus:outline-none placeholder:text-white/60"
+              className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-primary-blue bg-white text-gray-900 focus:outline-none"
             />
           </div>
 
@@ -194,7 +223,7 @@ export default function SponsorApplicationPage() {
               value={formData.industry}
               onChange={handleChange}
               placeholder="e.g., Automotive, Engineering, Technology..."
-              className="w-full px-4 py-3 bg-primary-blue text-white rounded-lg border-0 focus:ring-2 focus:ring-primary-blue-light focus:outline-none placeholder:text-white/60"
+              className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-primary-blue bg-white text-gray-900 focus:outline-none"
             />
           </div>
 
@@ -209,7 +238,7 @@ export default function SponsorApplicationPage() {
                 required
                 value={formData.sponsorshipTier}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-primary-blue text-white rounded-lg border-0 focus:ring-2 focus:ring-primary-blue-light focus:outline-none appearance-none pr-10"
+                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-primary-blue bg-white text-gray-900 focus:outline-none appearance-none pr-10"
               >
                 <option value="">Select...</option>
                 <option value="platinum">Platinum</option>
@@ -219,7 +248,7 @@ export default function SponsorApplicationPage() {
                 <option value="partner">Partner</option>
                 <option value="not-sure">Not Sure - Would like to discuss</option>
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
             </div>
           </div>
 
@@ -233,7 +262,7 @@ export default function SponsorApplicationPage() {
                 name="budget"
                 value={formData.budget}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-primary-blue text-white rounded-lg border-0 focus:ring-2 focus:ring-primary-blue-light focus:outline-none appearance-none pr-10"
+                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-primary-blue bg-white text-gray-900 focus:outline-none appearance-none pr-10"
               >
                 <option value="">Select...</option>
                 <option value="under-5k">Under €5,000</option>
@@ -242,7 +271,7 @@ export default function SponsorApplicationPage() {
                 <option value="25k-50k">€25,000 - €50,000</option>
                 <option value="50k+">€50,000+</option>
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
             </div>
           </div>
 
@@ -258,7 +287,7 @@ export default function SponsorApplicationPage() {
               value={formData.objectives}
               onChange={handleChange}
               placeholder="What are your main objectives for sponsoring Formula IHU? (e.g., Brand awareness, Talent recruitment, CSR initiatives...)"
-              className="w-full px-4 py-3 bg-primary-blue text-white rounded-lg border-0 focus:ring-2 focus:ring-primary-blue-light focus:outline-none placeholder:text-white/60 resize-none"
+              className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-primary-blue bg-white text-gray-900 focus:outline-none resize-none"
             />
           </div>
 
@@ -273,7 +302,7 @@ export default function SponsorApplicationPage() {
               value={formData.benefits}
               onChange={handleChange}
               placeholder="What specific benefits are you most interested in? (e.g., Logo placement, Speaking opportunities, Networking events...)"
-              className="w-full px-4 py-3 bg-primary-blue text-white rounded-lg border-0 focus:ring-2 focus:ring-primary-blue-light focus:outline-none placeholder:text-white/60 resize-none"
+              className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-primary-blue bg-white text-gray-900 focus:outline-none resize-none"
             />
           </div>
 
@@ -286,13 +315,13 @@ export default function SponsorApplicationPage() {
           </button>
 
           {submitStatus === 'success' && (
-            <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-800 dark:text-green-300">
+            <div className="p-4 bg-green-50 border-2 border-green-200 rounded-lg text-green-800">
               Thank you! Your sponsorship application has been submitted. We'll review it and get back to you soon.
             </div>
           )}
 
           {submitStatus === 'error' && (
-            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-800 dark:text-red-300">
+            <div className="p-4 bg-red-50 border-2 border-red-200 rounded-lg text-red-800">
               There was an error submitting your application. Please try again or contact us directly.
             </div>
           )}

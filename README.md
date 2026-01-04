@@ -134,8 +134,9 @@ The site can be deployed to any platform that supports Next.js:
 - `REVALIDATE_SECRET`: Secret token for on-demand revalidation webhook (generate a random string)
 - `NEXT_PUBLIC_SUPABASE_URL`: Supabase project URL (for quiz functionality)
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Supabase anonymous key (for quiz functionality)
-- `RESEND_API_KEY`: Resend API key for sending quiz confirmation emails (optional)
+- `RESEND_API_KEY`: Resend API key for sending emails (required for email notifications)
 - `FROM_EMAIL`: Email address to send from (optional, defaults to 'Formula IHU <noreply@fihu.gr>')
+- `NOTIFICATION_EMAILS`: Comma-separated list of email addresses to receive form submission notifications (e.g., "email1@example.com,email2@example.com")
 
 ## CMS Content Updates
 

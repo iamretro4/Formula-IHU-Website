@@ -10,24 +10,17 @@ export default function VolunteerApplicationPage() {
     lastName: '',
     email: '',
     phone: '',
-    age: '',
     availability: '',
-    interests: '',
-    experience: '',
-    motivation: '',
-    foodAllergies: '',
-    accommodationRequest: '',
-    technicalOperationalPreference: false,
+    dietaryPreference: '',
+    needsAccommodation: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const target = e.target;
-    const value = target.type === 'checkbox' ? (target as HTMLInputElement).checked : target.value;
     setFormData({
       ...formData,
-      [target.name]: value,
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -46,15 +39,10 @@ export default function VolunteerApplicationPage() {
             last_name: formData.lastName,
             email: formData.email,
             phone: formData.phone || null,
-            experience: formData.experience || null,
             availability: formData.availability || null,
-            motivation: formData.motivation || null,
             additional_data: {
-              age: formData.age || null,
-              interests: formData.interests || null,
-              foodAllergies: formData.foodAllergies || null,
-              accommodationRequest: formData.accommodationRequest || null,
-              technicalOperationalPreference: formData.technicalOperationalPreference || false,
+              dietaryPreference: formData.dietaryPreference || null,
+              needsAccommodation: formData.needsAccommodation || null,
             },
           },
         ]);
@@ -63,20 +51,40 @@ export default function VolunteerApplicationPage() {
         console.error('Error submitting application:', error);
         setSubmitStatus('error');
       } else {
+        // Send email notification
+        try {
+          await fetch('/api/send-form-notification', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              formType: 'volunteer',
+              formData: {
+                'First Name': formData.firstName,
+                'Last Name': formData.lastName,
+                'Email': formData.email,
+                'Phone': formData.phone,
+                'Availability': formData.availability,
+                'Dietary Preference': formData.dietaryPreference,
+                'Needs Accommodation': formData.needsAccommodation,
+              },
+            }),
+          });
+        } catch (emailError) {
+          console.error('Error sending notification email:', emailError);
+          // Don't fail the form submission if email fails
+        }
+
         setSubmitStatus('success');
         setFormData({
           firstName: '',
           lastName: '',
           email: '',
           phone: '',
-          age: '',
           availability: '',
-          interests: '',
-          experience: '',
-          motivation: '',
-          foodAllergies: '',
-          accommodationRequest: '',
-          technicalOperationalPreference: false,
+          dietaryPreference: '',
+          needsAccommodation: '',
         });
       }
     } catch (error) {
@@ -90,7 +98,7 @@ export default function VolunteerApplicationPage() {
   return (
     <div className="bg-white">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <Link href="/join-us" className="text-[#0066FF] hover:text-[#0052CC] mb-4 inline-block font-bold">
+        <Link href="/join-us" className="text-primary-blue hover:text-primary-blue-dark mb-4 inline-block font-bold">
           ← Back to Join Us
         </Link>
         
@@ -112,7 +120,7 @@ export default function VolunteerApplicationPage() {
                 required
                 value={formData.firstName}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0066FF] focus:border-[#0066FF] bg-white text-gray-900"
+                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-primary-blue bg-white text-gray-900 focus:outline-none"
               />
             </div>
             <div>
@@ -126,14 +134,14 @@ export default function VolunteerApplicationPage() {
                 required
                 value={formData.lastName}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0066FF] focus:border-[#0066FF] bg-white text-gray-900"
+                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-primary-blue bg-white text-gray-900 focus:outline-none"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                 Email *
               </label>
               <input
@@ -143,11 +151,11 @@ export default function VolunteerApplicationPage() {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0066FF] focus:border-[#0066FF] bg-white text-gray-900"
+                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-primary-blue bg-white text-gray-900 focus:outline-none"
               />
             </div>
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
                 Phone *
               </label>
               <input
@@ -157,34 +165,13 @@ export default function VolunteerApplicationPage() {
                 required
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0066FF] focus:border-[#0066FF] bg-white text-gray-900"
+                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-primary-blue bg-white text-gray-900 focus:outline-none"
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="age" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Age *
-            </label>
-            <select
-              id="age"
-              name="age"
-              required
-              value={formData.age}
-              onChange={handleChange}
-                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0066FF] focus:border-[#0066FF] bg-white text-gray-900"
-            >
-              <option value="">Select...</option>
-              <option value="18-25">18-25</option>
-              <option value="26-35">26-35</option>
-              <option value="36-45">36-45</option>
-              <option value="46-55">46-55</option>
-              <option value="56+">56+</option>
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="availability" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label htmlFor="availability" className="block text-sm font-medium text-gray-700 mb-2">
               Availability for Event Dates *
             </label>
             <textarea
@@ -195,117 +182,64 @@ export default function VolunteerApplicationPage() {
               value={formData.availability}
               onChange={handleChange}
               placeholder="Please indicate your availability for the event dates..."
-                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0066FF] focus:border-[#0066FF] bg-white text-gray-900"
+              className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-primary-blue bg-white text-gray-900 focus:outline-none"
             />
           </div>
 
           <div>
-            <label htmlFor="interests" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Areas of Interest *
+            <label htmlFor="dietaryPreference" className="block text-sm font-medium text-gray-700 mb-2">
+              Dietary Preference *
             </label>
-            <textarea
-              id="interests"
-              name="interests"
+            <select
+              id="dietaryPreference"
+              name="dietaryPreference"
               required
-              rows={3}
-              value={formData.interests}
+              value={formData.dietaryPreference}
               onChange={handleChange}
-              placeholder="e.g., Registration, Logistics, Team support, Media, Safety..."
-                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0066FF] focus:border-[#0066FF] bg-white text-gray-900"
-            />
+              className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-primary-blue bg-white text-gray-900 focus:outline-none"
+            >
+              <option value="">Select...</option>
+              <option value="no-restrictions">No Restrictions</option>
+              <option value="vegetarian">Vegetarian</option>
+              <option value="vegan">Vegan</option>
+              <option value="other">Other</option>
+            </select>
           </div>
 
           <div>
-            <label htmlFor="experience" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Previous Volunteer Experience
+            <label htmlFor="needsAccommodation" className="block text-sm font-medium text-gray-700 mb-2">
+              Do you need accommodation? *
             </label>
-            <textarea
-              id="experience"
-              name="experience"
-              rows={3}
-              value={formData.experience}
-              onChange={handleChange}
-              placeholder="Tell us about any previous volunteer or event experience..."
-                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0066FF] focus:border-[#0066FF] bg-white text-gray-900"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="motivation" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Why do you want to volunteer? *
-            </label>
-            <textarea
-              id="motivation"
-              name="motivation"
+            <select
+              id="needsAccommodation"
+              name="needsAccommodation"
               required
-              rows={5}
-              value={formData.motivation}
+              value={formData.needsAccommodation}
               onChange={handleChange}
-              placeholder="Tell us about your motivation and what you hope to gain from this experience..."
-              className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0066FF] focus:border-[#0066FF] bg-white text-gray-900"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="foodAllergies" className="block text-sm font-medium text-gray-700 mb-2">
-              Food Preferences / Allergies
-            </label>
-            <textarea
-              id="foodAllergies"
-              name="foodAllergies"
-              rows={3}
-              value={formData.foodAllergies}
-              onChange={handleChange}
-              placeholder="Please list any dietary restrictions, allergies, or food preferences..."
-              className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0066FF] focus:border-[#0066FF] bg-white text-gray-900"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="accommodationRequest" className="block text-sm font-medium text-gray-700 mb-2">
-              Accommodation Request
-            </label>
-            <textarea
-              id="accommodationRequest"
-              name="accommodationRequest"
-              rows={3}
-              value={formData.accommodationRequest}
-              onChange={handleChange}
-              placeholder="Do you need accommodation? Please provide any special requirements..."
-              className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0066FF] focus:border-[#0066FF] bg-white text-gray-900"
-            />
-          </div>
-
-          <div className="flex items-start">
-            <input
-              type="checkbox"
-              id="technicalOperationalPreference"
-              name="technicalOperationalPreference"
-              checked={formData.technicalOperationalPreference}
-              onChange={handleChange}
-              className="mt-1 h-4 w-4 text-[#0066FF] focus:ring-[#0066FF] border-gray-300 rounded"
-            />
-            <label htmlFor="technicalOperationalPreference" className="ml-2 block text-sm font-medium text-gray-700">
-              I prefer Technical/Operational roles
-            </label>
+              className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-primary-blue bg-white text-gray-900 focus:outline-none"
+            >
+              <option value="">Select...</option>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
           </div>
 
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full px-6 py-3 bg-[#0066FF] text-white font-bold rounded-lg hover:bg-[#0052CC] transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg"
+            className="w-full px-6 py-3 bg-primary-blue text-white font-bold rounded-lg hover:bg-primary-blue-dark transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg"
           >
             {isSubmitting ? 'Submitting...' : 'Submit Application'}
           </button>
 
           {submitStatus === 'success' && (
-            <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-800 dark:text-green-300">
+            <div className="p-4 bg-green-50 border-2 border-green-200 rounded-lg text-green-800">
               Thank you! Your application has been submitted. We'll review it and get back to you soon.
             </div>
           )}
 
           {submitStatus === 'error' && (
-            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-800 dark:text-red-300">
+            <div className="p-4 bg-red-50 border-2 border-red-200 rounded-lg text-red-800">
               There was an error submitting your application. Please try again or contact us directly.
             </div>
           )}
@@ -314,4 +248,3 @@ export default function VolunteerApplicationPage() {
     </div>
   );
 }
-

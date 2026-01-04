@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { urlFor } from '@/lib/sanity';
+import { urlFor } from '@/sanity/lib/image';
 import Image from 'next/image';
 import { ArrowRight, Calendar } from 'lucide-react';
 import Card from './ui/Card';

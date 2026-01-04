@@ -95,12 +95,6 @@ export default function NavigationClient({ events }: NavigationClientProps) {
                   onMouseLeave={() => setEventsOpen(false)}
                   className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-xl border-2 border-gray-200 py-2 animate-fade-in-down"
                 >
-                  <Link
-                    href="/events"
-                    className="block px-4 py-2 text-sm font-medium text-gray-900 hover:bg-primary-blue hover:text-white transition-all rounded-md mx-2"
-                  >
-                    All Events
-                  </Link>
                   {upcomingEvents.length > 0 && (
                     <>
                       <div className="border-t border-gray-100 my-1"></div>
@@ -195,13 +189,6 @@ export default function NavigationClient({ events }: NavigationClientProps) {
                 </button>
                 {eventsOpen && (
                   <div className="pl-4 mt-1 space-y-1">
-                    <Link
-                      href="/events"
-                      className="block px-3 py-2 text-sm text-gray-600 hover:text-primary-blue rounded-md hover:bg-gray-50"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      All Events
-                    </Link>
                     {upcomingEvents.map((event: any) => (
                       <Link
                         key={event._id}

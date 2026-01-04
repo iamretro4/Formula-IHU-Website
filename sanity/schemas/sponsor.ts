@@ -18,7 +18,7 @@ export default defineType({
       options: {
         hotspot: true,
       },
-      validation: (Rule) => Rule.required(),
+      // Logo is optional - sponsors can be displayed with just name if no logo
     }),
     defineField({
       name: 'website',

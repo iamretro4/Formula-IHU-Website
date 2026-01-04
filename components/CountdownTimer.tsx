@@ -1,28 +1,26 @@
 'use client';
 
+'use client';
+
 import { useState, useEffect } from 'react';
 import { Clock } from 'lucide-react';
-import Card from './ui/Card';
-import Badge from './ui/Badge';
 
 interface CountdownTimerProps {
   targetDate: string;
   eventTitle?: string;
 }
 
-interface TimeLeft {
-  days: number;
-  hours: number;
-  minutes: number;
-  seconds: number;
-}
-
 export default function CountdownTimer({ targetDate, eventTitle }: CountdownTimerProps) {
-  const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null);
+  const [timeLeft, setTimeLeft] = useState<{
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+  } | null>(null);
   const [isExpired, setIsExpired] = useState(false);
 
   useEffect(() => {
-    const calculateTimeLeft = (): TimeLeft | null => {
+    const calculateTime = () => {
       const difference = new Date(targetDate).getTime() - new Date().getTime();
 
       if (difference <= 0) {
@@ -30,65 +28,104 @@ export default function CountdownTimer({ targetDate, eventTitle }: CountdownTime
         return null;
       }
 
-      return {
-        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((difference / 1000 / 60) % 60),
-        seconds: Math.floor((difference / 1000) % 60),
-      };
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+      return { days, hours, minutes, seconds };
     };
 
-    setTimeLeft(calculateTimeLeft());
+    setTimeLeft(calculateTime());
     const timer = setInterval(() => {
-      const newTimeLeft = calculateTimeLeft();
-      setTimeLeft(newTimeLeft);
-    }, 1000);
+      const newTime = calculateTime();
+      if (newTime) {
+        setTimeLeft(newTime);
+      }
+    }, 1000); // Update every second
 
     return () => clearInterval(timer);
   }, [targetDate]);
 
   if (isExpired) {
     return (
-      <Card className="text-center py-8">
-        <p className="text-xl font-bold text-gray-900">Event has started!</p>
-      </Card>
+      <div className="text-center py-6">
+        <p className="text-xl font-bold text-white">Event has started!</p>
+      </div>
     );
   }
 
-  if (!timeLeft) {
+  if (timeLeft === null) {
     return null;
   }
 
-  const timeUnits = [
-    { label: 'Days', value: timeLeft.days },
-    { label: 'Hours', value: timeLeft.hours },
-    { label: 'Minutes', value: timeLeft.minutes },
-    { label: 'Seconds', value: timeLeft.seconds },
-  ];
-
   return (
-    <div className="bg-gradient-primary text-white border-0 shadow-xl rounded-xl p-6 md:p-8">
-      <div className="flex items-center justify-center gap-2 mb-6">
-        <Clock className="w-5 h-5" />
+    <div className="relative overflow-hidden rounded-2xl">
+      {/* Gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#1F45FC] via-[#4A6BFD] to-[#1A3AE0]"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.15),transparent_70%)]"></div>
+      
+      {/* Content */}
+      <div className="relative z-10 px-8 py-6 md:px-12 md:py-10">
         {eventTitle && (
-          <h3 className="text-lg font-semibold">{eventTitle}</h3>
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <Clock className="w-5 h-5 text-white/95" />
+            <h3 className="text-base md:text-lg font-semibold text-white/95 tracking-wide">
+              {eventTitle}
+            </h3>
+          </div>
         )}
-      </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {timeUnits.map((unit, index) => (
-          <div
-            key={unit.label}
-            className="text-center animate-scale-in"
-            style={{ animationDelay: `${index * 0.1}s` }}
-          >
-            <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 mb-2">
-              <div className="text-3xl md:text-4xl font-bold">
-                {String(unit.value).padStart(2, '0')}
+        
+        {/* Countdown display */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {/* Days */}
+          <div className="text-center">
+            <div className="relative bg-white/15 backdrop-blur-lg border-2 border-white/30 rounded-xl px-4 py-6 md:px-6 md:py-8 shadow-xl">
+              <div className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 tracking-tight drop-shadow-lg">
+                {timeLeft.days.toString().padStart(2, '0')}
+              </div>
+              <div className="text-xs md:text-sm font-semibold text-white/90 uppercase tracking-widest">
+                Days
               </div>
             </div>
-            <div className="text-sm font-medium opacity-90">{unit.label}</div>
           </div>
-        ))}
+          
+          {/* Hours */}
+          <div className="text-center">
+            <div className="relative bg-white/15 backdrop-blur-lg border-2 border-white/30 rounded-xl px-4 py-6 md:px-6 md:py-8 shadow-xl">
+              <div className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 tracking-tight drop-shadow-lg">
+                {timeLeft.hours.toString().padStart(2, '0')}
+              </div>
+              <div className="text-xs md:text-sm font-semibold text-white/90 uppercase tracking-widest">
+                Hours
+              </div>
+            </div>
+          </div>
+          
+          {/* Minutes */}
+          <div className="text-center">
+            <div className="relative bg-white/15 backdrop-blur-lg border-2 border-white/30 rounded-xl px-4 py-6 md:px-6 md:py-8 shadow-xl">
+              <div className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 tracking-tight drop-shadow-lg">
+                {timeLeft.minutes.toString().padStart(2, '0')}
+              </div>
+              <div className="text-xs md:text-sm font-semibold text-white/90 uppercase tracking-widest">
+                Minutes
+              </div>
+            </div>
+          </div>
+          
+          {/* Seconds */}
+          <div className="text-center">
+            <div className="relative bg-white/15 backdrop-blur-lg border-2 border-white/30 rounded-xl px-4 py-6 md:px-6 md:py-8 shadow-xl">
+              <div className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 tracking-tight drop-shadow-lg">
+                {timeLeft.seconds.toString().padStart(2, '0')}
+              </div>
+              <div className="text-xs md:text-sm font-semibold text-white/90 uppercase tracking-widest">
+                Seconds
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

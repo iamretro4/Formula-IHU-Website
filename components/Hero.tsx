@@ -54,14 +54,13 @@ export default async function Hero() {
                 </p>
                 <p className="text-base md:text-lg text-gray-300 mb-6">{featuredEvent.location}</p>
                 
-                {featuredEvent.startDate && (
-                  <div className="mt-6">
-                    <CountdownTimer 
-                      targetDate={featuredEvent.startDate} 
-                      eventTitle="Event starts in"
-                    />
-                  </div>
-                )}
+                {/* Registration Test Countdown - until 30-01-2026 at 13:00 CET */}
+                <div className="mt-6">
+                  <CountdownTimer 
+                    targetDate="2026-01-30T12:00:00.000Z" 
+                    eventTitle="Registration Test starts in"
+                  />
+                </div>
               </div>
             </div>
           )}

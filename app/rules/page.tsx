@@ -13,7 +13,9 @@ const categoryLabels: Record<string, string> = {
 export const revalidate = 60;
 
 export default async function RulesPage() {
-  const allDocuments = await getDocuments().catch(() => []);
+  const allDocuments = await getDocuments()
+    .then(docs => docs.filter((doc: any) => doc.category !== 'handbook' && doc.category !== 'event-handbook'))
+    .catch(() => []);
   const categories = Array.from(new Set(allDocuments.map((doc: any) => doc.category)));
 
   return (

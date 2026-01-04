@@ -1,9 +1,10 @@
 import { notFound } from 'next/navigation';
-import { getEventByYear, getEventDocuments, getSchedule, getRegisteredTeams } from '@/lib/sanity.queries';
+import { getEventByYear, getEventDocuments, getRegisteredTeams, getResults } from '@/lib/sanity.queries';
 import { urlFor } from '@/sanity/lib/image';
 import Image from 'next/image';
 import Link from 'next/link';
 import DocumentCard from '@/components/DocumentCard';
+import ResultCard from '@/components/ResultCard';
 
 // Revalidate this page every 60 seconds (fallback if webhook fails)
 export const revalidate = 60;
@@ -26,21 +27,28 @@ export default async function EventPage({
     notFound();
   }
 
-  const [documents, schedule, teams] = await Promise.all([
+  const [documents, teams, results] = await Promise.all([
     getEventDocuments(event._id).catch(() => []),
-    getSchedule(event._id).catch(() => []),
     getRegisteredTeams(event._id).catch(() => []),
+    getResults(event._id).catch(() => []),
   ]);
+
+  // Get overall results for preview (top 3 from each category)
+  const overallResults = results
+    .filter((r: any) => r.subcategory === 'overall')
+    .sort((a: any, b: any) => {
+      // Sort by category first, then position
+      if (a.category !== b.category) {
+        return a.category.localeCompare(b.category);
+      }
+      return a.position - b.position;
+    })
+    .slice(0, 6);
 
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  };
-
-  const formatTime = (timeString: string) => {
-    if (!timeString) return '';
-    return timeString;
   };
 
   return (
@@ -106,48 +114,6 @@ export default async function EventPage({
           </div>
         </div>
 
-        {/* Schedule */}
-        {schedule.length > 0 ? (
-          <section className="mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-8">Schedule</h2>
-                <div className="bg-gray-50 rounded-xl p-6 border-2 border-gray-200">
-              <div className="space-y-4">
-                {schedule.map((item: any) => (
-                      <div key={item._id} className="border-b-2 border-gray-200 pb-4 last:border-0 hover:bg-gray-100 rounded p-2 transition-all">
-                        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                          <div>
-                            <h3 className="font-bold text-gray-900">{item.title}</h3>
-                            {item.description && (
-                              <p className="text-sm text-gray-600 mt-1">{item.description}</p>
-                            )}
-                          </div>
-                          <div className="mt-2 md:mt-0 text-sm text-gray-600">
-                        <span>{formatDate(item.date)}</span>
-                        {item.time && <span className="ml-2">{formatTime(item.time)}</span>}
-                        {item.location && <span className="ml-2">• {item.location}</span>}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-                <Link
-                  href={`/events/${year}/schedule`}
-                  className="mt-4 inline-block text-[#0066FF] hover:text-[#0052CC] font-bold"
-                >
-                  View Full Schedule →
-                </Link>
-          </section>
-        ) : (
-              <section className="mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-8">Schedule</h2>
-                <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl p-16 text-center border-2 border-gray-200">
-                  <div className="text-7xl mb-6">📅</div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Schedule Coming Soon</h3>
-                  <p className="text-gray-700 text-lg">The detailed schedule for this event will be posted here.</p>
-                </div>
-              </section>
-        )}
 
         {/* Documents */}
         {documents.length > 0 ? (
@@ -175,6 +141,46 @@ export default async function EventPage({
                 </div>
               </section>
         )}
+
+        {/* Results - Only show for past or current events, not upcoming */}
+        {event.status === 'past' || event.status === 'current' ? (
+          results.length > 0 ? (
+            <section className="mb-12">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-3xl font-bold text-gray-900">Results</h2>
+                <Link
+                  href={`/events/${year}/results`}
+                  className="text-[#0066FF] hover:text-[#0052CC] font-bold"
+                >
+                  View All Results →
+                </Link>
+              </div>
+              {overallResults.length > 0 ? (
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-4">Overall Standings</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {overallResults.map((result: any, index: number) => (
+                      <ResultCard key={result._id} result={result} index={index} />
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl p-8 text-center border-2 border-gray-200">
+                  <p className="text-gray-700">View detailed results by category and subcategory.</p>
+                </div>
+              )}
+            </section>
+          ) : (
+            <section className="mb-12">
+              <h2 className="text-3xl font-bold text-gray-900 mb-8">Results</h2>
+              <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl p-16 text-center border-2 border-gray-200">
+                <div className="text-7xl mb-6">🏁</div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">Results Coming Soon</h3>
+                <p className="text-gray-700 text-lg">Competition results will be posted here once the event concludes.</p>
+              </div>
+            </section>
+          )
+        ) : null}
 
         {/* Teams */}
         {teams.length > 0 ? (

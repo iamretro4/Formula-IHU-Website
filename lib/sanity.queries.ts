@@ -86,7 +86,8 @@ export async function getSiteSettings() {
     title,
     tagline,
     contact,
-    social
+    social,
+    footer
   }`;
   return await client.fetch(query);
 }
@@ -154,18 +155,23 @@ export async function getEventByYear(year: number) {
 
 
 // Results queries
-export async function getResults(eventId?: string, category?: string) {
+export async function getResults(eventId?: string, category?: string, subcategory?: string) {
   let filters = [];
   if (eventId) filters.push(`event._ref == "${eventId}"`);
   if (category) filters.push(`category == "${category}"`);
+  if (subcategory) filters.push(`subcategory == "${subcategory}"`);
   
   const filterString = filters.length > 0 ? `&& ${filters.join(' && ')}` : '';
   const query = groq`*[_type == "result" ${filterString}] | order(position asc) {
     _id,
     category,
+    subcategory,
     position,
     points,
+    penalties,
+    vehicleNumber,
     year,
+    awards,
     event->{
       _id,
       year,
@@ -176,10 +182,27 @@ export async function getResults(eventId?: string, category?: string) {
       name,
       university,
       country,
-      logo
+      logo {
+        asset->{
+          _id,
+          url
+        }
+      }
     }
   }`;
-  return await client.fetch(query);
+  // Fetch results - team references should resolve even if teams are drafts
+  const results = await client.fetch(query);
+  
+  // Ensure team data is properly resolved
+  return results.map((result: any) => {
+    // If team is a reference object instead of resolved, try to handle it
+    if (result.team && typeof result.team === 'object' && result.team._ref && !result.team.name) {
+      // Team reference wasn't resolved - this shouldn't happen with proper query
+      // but we'll handle it gracefully
+      console.warn(`Team reference not resolved for result ${result._id}:`, result.team._ref);
+    }
+    return result;
+  });
 }
 
 
