@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { QuizData, Question, QuizStatus, TeamInfo, Answers } from './types';
 import { useQuizTimer } from './hooks/useQuizTimer';
 import Header from './components/Header';
@@ -604,9 +604,17 @@ export default function RegistrationTestsPage() {
         );
       }
       
+      // Filter questions based on vehicle category for display
+      const filteredQuestions = React.useMemo(() => {
+        if (!teamInfo.vehicleCategory) return quizData.questions;
+        return quizData.questions.filter((q: any) => 
+          !q.category || q.category === 'common' || q.category === teamInfo.vehicleCategory
+        );
+      }, [quizData.questions, teamInfo.vehicleCategory]);
+      
       return (
         <QuizView 
-          questions={quizData.questions}
+          questions={filteredQuestions}
           answers={answers}
           setAnswers={setAnswers}
           onSubmit={handleQuizComplete}
