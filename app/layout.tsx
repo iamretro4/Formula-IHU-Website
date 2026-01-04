@@ -19,6 +19,7 @@ export const metadata: Metadata = {
     apple: '/logo.png',
     shortcut: '/logo.png',
   },
+  // Next.js 13+ App Router automatically uses app/icon.png as favicon
 };
 
 export default function RootLayout({

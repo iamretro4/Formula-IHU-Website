@@ -69,6 +69,15 @@ export default function RegistrationTestsPage() {
 
         // Check if quiz should be active
         if (now < scheduledStart) {
+          // Set quiz data even when waiting so PreQuizView can show
+          setQuizData({
+            id: data.id,
+            title: data.title,
+            globalStartTime: scheduledStart,
+            endTime: scheduledEnd,
+            questions: data.questions || [],
+          });
+          setInstructions(data.instructions || '');
           setAppState('waiting');
           // Auto-reload when quiz starts
           const timeUntilStart = scheduledStart.getTime() - now.getTime();
@@ -490,6 +499,26 @@ export default function RegistrationTestsPage() {
     }
 
     if (appState === 'waiting') {
+      // Show PreQuizView even when waiting so teams can prepare and select EV/CV
+      if (quizData && quizData.questions && quizData.questions.length > 0) {
+        return (
+          <PreQuizView 
+            teamInfo={teamInfo} 
+            setTeamInfo={setTeamInfo} 
+            onStart={() => {
+              // Don't allow starting before scheduled time
+              const now = new Date();
+              const scheduledStart = quizData.globalStartTime;
+              if (now < scheduledStart) {
+                alert(`The quiz will begin at ${scheduledStart.toLocaleString()}. Please wait.`);
+                return;
+              }
+              handleStart();
+            }}
+            instructions={instructions}
+          />
+        );
+      }
       return (
         <div className="flex justify-center items-center h-screen">
           <div className="text-center">

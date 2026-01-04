@@ -16,7 +16,8 @@ export async function GET() {
       );
     }
 
-    const query = groq`*[_type == "registrationQuiz" && isActive == true][0] {
+    // First try to get an active quiz
+    let quiz = await client.fetch(groq`*[_type == "registrationQuiz" && isActive == true][0] {
       _id,
       title,
       isActive,
@@ -40,25 +41,55 @@ export async function GET() {
         }
       },
       instructions
-    }`;
-
-    const quiz = await client.fetch(query).catch((error) => {
-      console.error('Error fetching quiz from Sanity:', error);
+    }`).catch((error) => {
+      console.error('Error fetching active quiz from Sanity:', error);
       return null;
     });
+
+    // If no active quiz, get the latest quiz (active or not) so teams can prepare
+    if (!quiz) {
+      quiz = await client.fetch(groq`*[_type == "registrationQuiz"] | order(_createdAt desc)[0] {
+        _id,
+        title,
+        isActive,
+        scheduledStartTime,
+        questions[] {
+          text,
+          options,
+          correctOption,
+          category,
+          image {
+            asset-> {
+              _id,
+              url,
+              metadata {
+                dimensions {
+                  width,
+                  height
+                }
+              }
+            }
+          }
+        },
+        instructions
+      }`).catch((error) => {
+        console.error('Error fetching latest quiz from Sanity:', error);
+        return null;
+      });
+    }
 
     if (!quiz) {
       // Check if there are any quizzes at all (for debugging)
       const allQuizzes = await client.fetch(groq`*[_type == "registrationQuiz"] { _id, title, isActive }`).catch(() => []);
-      console.log('No active quiz found. Available quizzes:', allQuizzes);
+      console.log('No quiz found. Available quizzes:', allQuizzes);
       
       return NextResponse.json(
         { 
-          error: 'No active quiz found',
+          error: 'No quiz found',
           availableQuizzes: allQuizzes.length,
           message: allQuizzes.length === 0 
             ? 'No quiz documents exist in Sanity. Please create one in the Studio.'
-            : 'No quiz is currently marked as active. Please activate a quiz in the Studio.'
+            : 'No quiz is currently available.'
         },
         { status: 404 }
       );

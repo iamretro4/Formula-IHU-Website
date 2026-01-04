@@ -1,0 +1,6 @@
+Your Resend Webhook URL:
+
+https://formula-ihu-website.vercel.app/api/webhooks/resend
+
+(If you have a custom domain configured, you can also use: https://fihu.gr/api/webhooks/resend)
+
