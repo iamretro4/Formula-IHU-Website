@@ -180,7 +180,6 @@ export default async function ResultsPage({
                               <tr className="border-b-2 border-gray-300">
                                 <th className="text-left py-3 px-4 font-semibold text-gray-700">Position</th>
                                 <th className="text-left py-3 px-4 font-semibold text-gray-700">Team</th>
-                                <th className="text-left py-3 px-4 font-semibold text-gray-700">University</th>
                                 <th className="text-left py-3 px-4 font-semibold text-gray-700">Country</th>
                                 <th className="text-right py-3 px-4 font-semibold text-gray-700">Points</th>
                               </tr>
@@ -207,9 +206,6 @@ export default async function ResultsPage({
                                   </td>
                                   <td className="py-3 px-4 font-medium text-gray-900">
                                     {result.team?.name || 'Unknown Team'}
-                                  </td>
-                                  <td className="py-3 px-4 text-gray-600">
-                                    {result.team?.university || '-'}
                                   </td>
                                   <td className="py-3 px-4 text-gray-600">
                                     {result.team?.country || '-'}

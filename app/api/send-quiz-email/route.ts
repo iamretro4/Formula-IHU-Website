@@ -82,7 +82,7 @@ function generateEmailTemplate(
                       </p>
                       <p style="margin: 0; color: #6b7280; font-size: 14px; line-height: 1.6;">
                         If you have any questions, please contact us at{' '}
-                        <a href="mailto:technical.formulaihu@ihu.gr" style="color: #0066FF; text-decoration: none;">technical.formulaihu@ihu.gr</a>
+                        <a href="mailto:quiz@fihu.gr" style="color: #0066FF; text-decoration: none;">quiz@fihu.gr</a>
                       </p>
                     </div>
                   </td>
@@ -126,74 +126,124 @@ export async function POST(request: NextRequest) {
 
     // Send email using Resend (or your preferred email service)
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
-    const FROM_EMAIL = process.env.FROM_EMAIL || 'Formula IHU <noreply@fihu.gr>';
+    const FROM_EMAIL = process.env.FROM_EMAIL || 'Formula IHU <quiz@fihu.gr>';
 
     if (!RESEND_API_KEY) {
-      // In development, log the email instead of failing
+      // In development, return success but don't send email
       if (process.env.NODE_ENV === 'development') {
-        console.log('='.repeat(60));
-        console.log('EMAIL WOULD BE SENT TO:', teamEmail);
-        console.log('SUBJECT: Quiz Submission Confirmation - Formula IHU');
-        console.log('='.repeat(60));
-        console.log('Email HTML preview (first 500 chars):');
-        console.log(emailHtml.substring(0, 500));
-        console.log('='.repeat(60));
-        
         return NextResponse.json(
           { 
             success: true, 
-            message: 'Email logged (RESEND_API_KEY not configured)',
-            debug: {
-              recipient: teamEmail,
-              emailLength: emailHtml.length
-            }
+            message: 'Email would be sent (RESEND_API_KEY not configured in development)',
+            recipient: teamEmail
           },
           { status: 200 }
         );
       }
       
+      // In production, return error but don't fail the submission
       return NextResponse.json(
-        { error: 'Email service not configured. Please set RESEND_API_KEY in environment variables.' },
-        { status: 500 }
+        { 
+          success: false,
+          error: 'Email service not configured',
+          message: 'Submission was successful, but email could not be sent. Please contact support if you need a confirmation.'
+        },
+        { status: 200 } // Return 200 so it doesn't fail the submission
       );
     }
 
-    // Send email via Resend API
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: FROM_EMAIL,
-        to: [teamEmail],
-        subject: 'Quiz Submission Confirmation - Formula IHU',
-        html: emailHtml,
-      }),
-    });
-
-    const responseData = await response.json();
-
-    if (!response.ok) {
-      console.error('Resend API error:', responseData);
-      throw new Error(responseData.message || 'Failed to send email');
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(teamEmail)) {
+      return NextResponse.json(
+        { 
+          success: false,
+          error: 'Invalid email address',
+          message: 'Submission was successful, but email could not be sent due to invalid email format.'
+        },
+        { status: 200 } // Return 200 so it doesn't fail the submission
+      );
     }
 
+    // Send email via Resend API with retry logic
+    let lastError: Error | null = null;
+    const maxRetries = 2;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const response = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${RESEND_API_KEY}`,
+          },
+          body: JSON.stringify({
+            from: FROM_EMAIL,
+            to: [teamEmail],
+            reply_to: 'quiz@fihu.gr',
+            subject: 'Quiz Submission Confirmation - Formula IHU',
+            html: emailHtml,
+          }),
+        });
+
+        const responseData = await response.json();
+
+        if (response.ok) {
+          return NextResponse.json(
+            { 
+              success: true, 
+              message: 'Email sent successfully',
+              emailId: responseData.id
+            },
+            { status: 200 }
+          );
+        }
+
+        // If it's a client error (4xx), don't retry
+        if (response.status >= 400 && response.status < 500) {
+          return NextResponse.json(
+            { 
+              success: false,
+              error: 'Email service error',
+              message: 'Submission was successful, but email could not be sent. Please contact support if you need a confirmation.',
+              details: process.env.NODE_ENV === 'development' ? responseData.message : undefined
+            },
+            { status: 200 } // Return 200 so it doesn't fail the submission
+          );
+        }
+
+        // Server error (5xx) - will retry
+        if (attempt < maxRetries) {
+          // Wait before retry (exponential backoff)
+          await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+        }
+      } catch {
+        if (attempt < maxRetries) {
+          // Wait before retry (exponential backoff)
+          await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+        }
+      }
+    }
+
+    // All retries failed - return success but note email failure
     return NextResponse.json(
       { 
-        success: true, 
-        message: 'Email sent successfully',
-        emailId: responseData.id
+        success: false,
+        error: 'Email sending failed after retries',
+        message: 'Submission was successful, but email could not be sent after multiple attempts. Please contact support if you need a confirmation.'
       },
-      { status: 200 }
+      { status: 200 } // Return 200 so it doesn't fail the submission
     );
 
-  } catch (error) {
-    console.error('Error sending email:', error);
+  } catch {
+    // Unexpected error - return success but note email failure
     return NextResponse.json(
-      { error: 'Failed to send email', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
+      { 
+        success: false,
+        error: 'Unexpected error',
+        message: 'Submission was successful, but email could not be sent. Please contact support if you need a confirmation.'
+      },
+      { status: 200 } // Return 200 so it doesn't fail the submission
     );
   }
 }

@@ -31,7 +31,7 @@ export default function TeamPortalPage() {
             Authentication Required
           </h2>
           <p className="text-gray-600 text-center mb-6">
-            Please log in to access the team portal. If you don't have an account, 
+            Please log in to access the team portal. If you don&apos;t have an account, 
             please contact us to register your team.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

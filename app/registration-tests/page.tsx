@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { QuizData, Question, QuizStatus, TeamInfo, Answers } from './types';
 import { useQuizTimer } from './hooks/useQuizTimer';
 import Header from './components/Header';
@@ -353,29 +353,55 @@ export default function RegistrationTestsPage() {
     const finalScore = calculateScore(answers, filteredQuestions);
     setScore(finalScore);
 
-    // Submit to API FIRST, then update UI
+    // Submit to API with retry logic for network issues
+    const submitWithRetry = async (retries = 3): Promise<Response> => {
+      for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+          const response = await fetch('/api/quiz/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              teamName: teamInfo.name,
+              teamEmail: teamInfo.email,
+              vehicleCategory: teamInfo.vehicleCategory,
+              preferredTeamNumber: teamInfo.preferredTeamNumber,
+              alternativeTeamNumber: teamInfo.alternativeTeamNumber,
+              fuelType: teamInfo.fuelType,
+              answers,
+              timeTaken: timeDiff,
+              score: finalScore,
+              questions: filteredQuestions.map(q => ({
+                id: q.id,
+                text: q.text,
+                options: q.options,
+                correctOption: q.correctOption,
+              })),
+            }),
+          });
+          
+          // If successful or client error (4xx), return immediately
+          if (response.ok || response.status < 500) {
+            return response;
+          }
+          
+          // For server errors (5xx), retry with exponential backoff
+          if (attempt < retries) {
+            await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+          }
+        } catch (error) {
+          // Network errors - retry with exponential backoff
+          if (attempt < retries) {
+            await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+          } else {
+            throw error;
+          }
+        }
+      }
+      throw new Error('Max retries exceeded');
+    };
+
     try {
-      const response = await fetch('/api/quiz/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          teamName: teamInfo.name,
-          teamEmail: teamInfo.email,
-          vehicleCategory: teamInfo.vehicleCategory,
-          preferredTeamNumber: teamInfo.preferredTeamNumber,
-          alternativeTeamNumber: teamInfo.alternativeTeamNumber,
-          fuelType: teamInfo.fuelType,
-          answers,
-          timeTaken: timeDiff,
-          score: finalScore,
-          questions: filteredQuestions.map(q => ({
-            id: q.id,
-            text: q.text,
-            options: q.options,
-            correctOption: q.correctOption,
-          })),
-        }),
-      });
+      const response = await submitWithRetry();
 
       if (!response.ok) {
         let error;
@@ -471,12 +497,13 @@ export default function RegistrationTestsPage() {
           }),
         });
 
-        if (!emailResponse.ok) {
-          console.warn('Email sending failed, but submission was successful');
+        const emailResult = await emailResponse.json();
+        if (!emailResult.success) {
+          // Email failed but submission succeeded - this is OK
+          // User will still see their results on screen
         }
       } catch (error) {
-        // Don't fail the submission if email fails
-        console.error('Error sending email:', error);
+        // Don't fail the submission if email fails - submission is already successful
       }
     } catch (error: any) {
       console.error('Error submitting quiz:', error);
@@ -604,17 +631,9 @@ export default function RegistrationTestsPage() {
         );
       }
       
-      // Filter questions based on vehicle category for display
-      const filteredQuestions = React.useMemo(() => {
-        if (!teamInfo.vehicleCategory) return quizData.questions;
-        return quizData.questions.filter((q: any) => 
-          !q.category || q.category === 'common' || q.category === teamInfo.vehicleCategory
-        );
-      }, [quizData.questions, teamInfo.vehicleCategory]);
-      
       return (
         <QuizView 
-          questions={filteredQuestions}
+          questions={quizData.questions}
           answers={answers}
           setAnswers={setAnswers}
           onSubmit={handleQuizComplete}

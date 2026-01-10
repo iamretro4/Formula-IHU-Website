@@ -44,7 +44,6 @@ export default function ContactPage() {
         ]);
 
       if (error) {
-        console.error('Error submitting form:', error);
         setSubmitStatus('error');
       } else {
         // Send email notification
@@ -64,16 +63,14 @@ export default function ContactPage() {
               },
             }),
           });
-        } catch (emailError) {
-          console.error('Error sending notification email:', emailError);
+        } catch {
           // Don't fail the form submission if email fails
         }
 
         setSubmitStatus('success');
         setFormData({ name: '', email: '', subject: '', message: '' });
       }
-    } catch (error) {
-      console.error('Error submitting form:', error);
+    } catch {
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
@@ -92,10 +89,10 @@ export default function ContactPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">Contact Us</h1>
         <p className="text-lg text-gray-600 mb-12">
-          Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+          Have questions? We&apos;d love to hear from you. Send us a message and we&apos;ll respond as soon as possible.
         </p>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Contact Form */}
           <div>
             <h2 className="text-2xl font-semibold text-gray-900 mb-6">Send us a Message</h2>
@@ -172,7 +169,7 @@ export default function ContactPage() {
               </button>
               {submitStatus === 'success' && (
                 <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800">
-                  Thank you! Your message has been sent. We'll get back to you soon.
+                  Thank you! Your message has been sent. We&apos;ll get back to you soon.
                 </div>
               )}
               {submitStatus === 'error' && (

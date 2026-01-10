@@ -7,10 +7,12 @@ import { useEffect, useState } from 'react';
 
 export default function ConditionalLayout({ 
   children,
-  events = []
+  events = [],
+  siteSettings
 }: { 
   children: React.ReactNode;
   events?: any[];
+  siteSettings?: any;
 }) {
   const pathname = usePathname();
   const [isQuizActive, setIsQuizActive] = useState(false);
@@ -96,19 +98,22 @@ export default function ConditionalLayout({
     };
   }, []);
 
-  // Hide header/footer for quiz pages or when quiz is active
-  const isQuizPage = pathname?.includes('/registration-tests');
+  // Hide header/footer ONLY for quiz pages or when quiz is active on home page
+  // Default behavior: show navigation and footer
+  const isQuizPage = pathname ? pathname.includes('/registration-tests') : false;
   const shouldHideNav = isQuizPage || (isQuizActive && pathname === '/');
 
+  // Only hide navigation/footer for specific quiz-related conditions
   if (shouldHideNav) {
     return <main className="min-h-screen">{children}</main>;
   }
 
+  // Always show navigation and footer for non-quiz pages
   return (
     <>
       <NavigationClient events={events} />
       <main className="min-h-screen">{children}</main>
-      <FooterClient events={events} />
+      <FooterClient events={events} siteSettings={siteSettings} />
     </>
   );
 }

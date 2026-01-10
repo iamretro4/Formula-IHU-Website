@@ -52,7 +52,7 @@ export default async function SponsorsPage() {
                 <h2 className="text-2xl font-semibold text-gray-900 mb-8 border-b border-gray-200 pb-2">
                   Organized By
                 </h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
                   {sponsorsByTier['platinum'].map((sponsor: any) => (
                     <div
                       key={sponsor._id}
@@ -97,7 +97,7 @@ export default async function SponsorsPage() {
                   <h2 className="text-2xl font-semibold text-gray-900 mb-8 border-b border-gray-200 pb-2">
                     {tierLabels[tier]}
                   </h2>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
                     {tierSponsors.map((sponsor: any) => (
                       <div
                         key={sponsor._id}

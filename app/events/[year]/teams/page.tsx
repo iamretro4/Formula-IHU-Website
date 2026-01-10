@@ -63,7 +63,6 @@ export default async function EventTeamsPage({
                   </div>
                 )}
                 <h3 className="text-lg font-semibold text-gray-900 mb-1">{team.name}</h3>
-                <p className="text-sm text-gray-600 mb-1">{team.university}</p>
                 {team.country && (
                   <p className="text-xs text-gray-500 mb-2">{team.country}</p>
                 )}

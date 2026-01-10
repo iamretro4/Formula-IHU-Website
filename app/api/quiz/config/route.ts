@@ -9,7 +9,6 @@ export async function GET() {
     // Check if Sanity client is configured
     const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
     if (!projectId) {
-      console.error('NEXT_PUBLIC_SANITY_PROJECT_ID is not set');
       return NextResponse.json(
         { error: 'Sanity client not configured' },
         { status: 500 }
@@ -41,8 +40,7 @@ export async function GET() {
         }
       },
       instructions
-    }`).catch((error) => {
-      console.error('Error fetching active quiz from Sanity:', error);
+    }`).catch(() => {
       return null;
     });
 
@@ -72,16 +70,14 @@ export async function GET() {
           }
         },
         instructions
-      }`).catch((error) => {
-        console.error('Error fetching latest quiz from Sanity:', error);
+      }`).catch(() => {
         return null;
       });
     }
 
     if (!quiz) {
-      // Check if there are any quizzes at all (for debugging)
+      // Check if there are any quizzes at all
       const allQuizzes = await client.fetch(groq`*[_type == "registrationQuiz"] { _id, title, isActive }`).catch(() => []);
-      console.log('No quiz found. Available quizzes:', allQuizzes);
       
       return NextResponse.json(
         { 
@@ -113,8 +109,7 @@ export async function GET() {
       questions: transformedQuestions,
       instructions: quiz.instructions || '',
     });
-  } catch (error) {
-    console.error('Error fetching quiz config:', error);
+  } catch {
     return NextResponse.json(
       { error: 'Failed to fetch quiz configuration' },
       { status: 500 }

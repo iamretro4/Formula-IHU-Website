@@ -27,6 +27,8 @@ export default function ScrutineerApplicationPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Temporarily disabled
+    return;
     setIsSubmitting(true);
     setSubmitStatus('idle');
 
@@ -111,7 +113,12 @@ export default function ScrutineerApplicationPage() {
           Scrutineers ensure all vehicles meet safety and technical regulations. Your attention to detail keeps the competition safe and fair.
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Available Soon Banner */}
+        <div className="mb-6 p-4 bg-yellow-50 border-2 border-yellow-300 rounded-lg text-center">
+          <p className="text-lg font-bold text-yellow-900">Available Soon</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6 opacity-60 pointer-events-none">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label htmlFor="firstName" className="block text-sm font-bold text-gray-700 mb-2">
@@ -252,12 +259,12 @@ export default function ScrutineerApplicationPage() {
             disabled={isSubmitting}
             className="w-full px-6 py-3 bg-primary-blue text-white font-bold rounded-lg hover:bg-primary-blue-dark transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg"
           >
-            {isSubmitting ? 'Submitting...' : 'Submit Application'}
+            Submit Application
           </button>
 
           {submitStatus === 'success' && (
             <div className="p-4 bg-green-50 border-2 border-green-200 rounded-lg text-green-800">
-              Thank you! Your application has been submitted. We'll review it and get back to you soon.
+              Thank you! Your application has been submitted. We&apos;ll review it and get back to you soon.
             </div>
           )}
 

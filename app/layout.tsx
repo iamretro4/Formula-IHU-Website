@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import ConditionalLayoutWrapper from "./conditional-layout-wrapper";
@@ -20,6 +20,13 @@ export const metadata: Metadata = {
     shortcut: '/logo.png',
   },
   // Next.js 13+ App Router automatically uses app/icon.png as favicon
+  // We've copied logo.png to app/icon.png and app/apple-icon.png
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({

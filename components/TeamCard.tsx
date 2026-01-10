@@ -31,10 +31,6 @@ export default function TeamCard({ team }: TeamCardProps) {
           {team.name}
         </h3>
         <div className="space-y-1 mb-3">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <GraduationCap className="w-4 h-4 text-primary-blue" />
-            <span>{team.university}</span>
-          </div>
           {team.country && (
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <MapPin className="w-4 h-4 text-primary-blue" />

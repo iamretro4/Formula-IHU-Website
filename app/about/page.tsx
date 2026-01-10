@@ -1,4 +1,5 @@
 import { getPageContent } from '@/lib/sanity.queries';
+import ImageCarousel from '@/components/ImageCarousel';
 
 // Revalidate this page every 60 seconds (fallback if webhook fails)
 export const revalidate = 60;
@@ -6,13 +7,40 @@ export const revalidate = 60;
 export default async function AboutPage() {
   const pageContent = await getPageContent('about').catch(() => null);
 
+  // Images for carousels - distributed across the page
+  const topCarouselImages: Array<{ url: string; alt: string }> = [
+    { url: '/images/about/2025Event2.jpeg', alt: 'Formula IHU 2025 Event' },
+  ];
+
+  const carousel1Images: Array<{ url: string; alt: string }> = [
+    { url: '/images/about/2025Event4.jpeg', alt: 'Formula IHU 2025 Event' },
+  ];
+
+  const carousel2Images: Array<{ url: string; alt: string }> = [
+    { url: '/images/about/2025Event1.jpeg', alt: 'Formula IHU 2025 Event' },
+  ];
+
+  const carousel3Images: Array<{ url: string; alt: string }> = [
+    { url: '/images/about/2025Event6.jpeg', alt: 'Formula IHU 2025 Event' },
+  ];
+
   return (
     <div className="bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <div className="max-w-3xl mx-auto">
-          <h1 className="text-4xl font-bold text-gray-900 mb-8">
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6 sm:mb-8">
             {pageContent?.title || 'About Formula IHU'}
           </h1>
+
+          {/* Photo Carousel at the top */}
+          <div className="mb-12">
+            <ImageCarousel
+              images={topCarouselImages}
+              autoPlay={true}
+              interval={5000}
+              height="h-64 md:h-96"
+            />
+          </div>
 
           <div className="prose prose-lg max-w-none text-gray-700">
             <p className="text-lg mb-6">
@@ -22,6 +50,17 @@ export default async function AboutPage() {
             <p className="text-base mb-6 text-gray-600 italic">
               Organized by International Hellenic University
             </p>
+
+            {/* Photo Carousel after first paragraph */}
+            <div className="my-12">
+              <ImageCarousel
+                images={carousel1Images}
+                autoPlay={true}
+                interval={5000}
+                height="h-64 md:h-96"
+              />
+            </div>
+
             <h2 className="text-2xl font-semibold text-gray-900 mb-4 mt-8">
               What is Formula Student?
             </h2>
@@ -31,6 +70,17 @@ export default async function AboutPage() {
               real-world engineering experience and challenges them to apply their knowledge 
               in a competitive environment.
             </p>
+
+            {/* Photo Carousel after second paragraph */}
+            <div className="my-12">
+              <ImageCarousel
+                images={carousel2Images}
+                autoPlay={true}
+                interval={5000}
+                height="h-64 md:h-96"
+              />
+            </div>
+
             <h2 className="text-2xl font-semibold text-gray-900 mb-4 mt-8">
               Our Mission
             </h2>
@@ -39,6 +89,17 @@ export default async function AboutPage() {
               among students. We provide a platform for students to showcase their skills, 
               learn from industry professionals, and compete at an international level.
             </p>
+
+            {/* Photo Carousel after third paragraph */}
+            <div className="my-12">
+              <ImageCarousel
+                images={carousel3Images}
+                autoPlay={true}
+                interval={5000}
+                height="h-64 md:h-96"
+              />
+            </div>
+
             <h2 className="text-2xl font-semibold text-gray-900 mb-4 mt-8">
               The Competition
             </h2>

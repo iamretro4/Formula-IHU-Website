@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { ChevronDown, Menu, X } from 'lucide-react';
 import Logo from './Logo';
@@ -16,6 +16,7 @@ export default function NavigationClient({ events }: NavigationClientProps) {
   const [eventsOpen, setEventsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
+  const eventsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,6 +24,29 @@ export default function NavigationClient({ events }: NavigationClientProps) {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleEventsMouseEnter = () => {
+    if (eventsTimeoutRef.current) {
+      clearTimeout(eventsTimeoutRef.current);
+      eventsTimeoutRef.current = null;
+    }
+    setEventsOpen(true);
+  };
+
+  const handleEventsMouseLeave = () => {
+    // Add a small delay before closing to make it more forgiving
+    eventsTimeoutRef.current = setTimeout(() => {
+      setEventsOpen(false);
+    }, 150); // 150ms delay
+  };
+
+  useEffect(() => {
+    return () => {
+      if (eventsTimeoutRef.current) {
+        clearTimeout(eventsTimeoutRef.current);
+      }
+    };
   }, []);
 
   const navItems = [
@@ -75,10 +99,12 @@ export default function NavigationClient({ events }: NavigationClientProps) {
             </Link>
             
             {/* Events Dropdown */}
-            <div className="relative">
+            <div 
+              className="relative"
+              onMouseEnter={handleEventsMouseEnter}
+              onMouseLeave={handleEventsMouseLeave}
+            >
               <button
-                onMouseEnter={() => setEventsOpen(true)}
-                onMouseLeave={() => setEventsOpen(false)}
                 className={`px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary-blue rounded-md transition-colors flex items-center gap-1 ${
                   pathname?.startsWith('/events') ? 'text-primary-blue bg-primary-blue/10' : 'hover:bg-gray-50'
                 }`}
@@ -91,10 +117,9 @@ export default function NavigationClient({ events }: NavigationClientProps) {
               </button>
               {eventsOpen && (
                 <div
-                  onMouseEnter={() => setEventsOpen(true)}
-                  onMouseLeave={() => setEventsOpen(false)}
-                  className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-xl border-2 border-gray-200 py-2 animate-fade-in-down"
+                  className="absolute top-full left-0 pt-2 w-64 animate-fade-in-down"
                 >
+                  <div className="bg-white rounded-xl shadow-xl border-2 border-gray-200 py-2">
                   {upcomingEvents.length > 0 && (
                     <>
                       <div className="border-t border-gray-100 my-1"></div>
@@ -129,6 +154,7 @@ export default function NavigationClient({ events }: NavigationClientProps) {
                       ))}
                     </>
                   )}
+                  </div>
                 </div>
               )}
             </div>

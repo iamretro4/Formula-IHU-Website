@@ -9,9 +9,6 @@ import { Resend } from 'resend';
  * - technical@fihu.gr
  * 
  * Documentation: https://resend.com/docs/dashboard/receiving/introduction
- * 
- * Endpoint: /api/webhooks/resend
- * Methods: GET (for testing), POST (for webhook events)
  */
 
 export async function POST(request: NextRequest) {

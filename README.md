@@ -135,7 +135,7 @@ The site can be deployed to any platform that supports Next.js:
 - `NEXT_PUBLIC_SUPABASE_URL`: Supabase project URL (for quiz functionality)
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Supabase anonymous key (for quiz functionality)
 - `RESEND_API_KEY`: Resend API key for sending emails (required for email notifications)
-- `FROM_EMAIL`: Email address to send from (optional, defaults to 'Formula IHU <noreply@fihu.gr>')
+- `FROM_EMAIL`: Email address to send from (optional, defaults to 'Formula IHU <quiz@fihu.gr>' for quiz emails, 'Formula IHU <info@fihu.gr>' for form notifications)
 - `NOTIFICATION_EMAILS`: Comma-separated list of email addresses to receive form submission notifications (e.g., "email1@example.com,email2@example.com")
 
 ## CMS Content Updates

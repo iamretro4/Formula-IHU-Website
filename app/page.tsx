@@ -84,13 +84,13 @@ export default async function Home() {
       <Hero />
       
       {/* Competition Info Section */}
-      <section className="py-24 bg-gradient-to-b from-white via-gray-50 to-white">
+      <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-b from-white via-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">
               {competitionTitle}
             </h2>
-            <p className="text-xl md:text-2xl text-gray-700 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-lg sm:text-xl md:text-2xl text-gray-700 max-w-4xl mx-auto leading-relaxed px-4">
               {competitionDescription}
             </p>
           </div>
@@ -99,12 +99,12 @@ export default async function Home() {
 
       {/* Featured Documents */}
       {featuredDocs.length > 0 ? (
-        <section className="py-20 bg-white">
+        <section className="py-12 sm:py-16 lg:py-20 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center mb-12">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 sm:mb-12 gap-4">
               <div>
-                <h2 className="text-4xl font-bold text-gray-900 mb-2">Featured Documents</h2>
-                <p className="text-gray-600">Important competition documents and resources</p>
+                <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">Featured Documents</h2>
+                <p className="text-gray-600 text-sm sm:text-base">Important competition documents and resources</p>
               </div>
               <Link
                 href="/rules"
@@ -114,7 +114,7 @@ export default async function Home() {
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {featuredDocs.map((doc: any) => (
                 <DocumentCard key={doc._id} document={doc} />
               ))}
@@ -130,10 +130,10 @@ export default async function Home() {
       <NewsSection news={featuredNews.length > 0 ? featuredNews : []} />
 
       {/* Quick Links */}
-      <section className="py-24 bg-gradient-to-b from-gray-50 to-white">
+      <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl font-bold text-gray-900 mb-12 text-center">{homePageContent?.quickLinksTitle || 'Quick Links'}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-8 sm:mb-12 text-center">{homePageContent?.quickLinksTitle || 'Quick Links'}</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <Link
               href="/about"
               className="bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-primary-blue hover:shadow-xl transition-all transform hover:-translate-y-2 text-center group card-hover"

@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
 
     // Get email configuration
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
-    const FROM_EMAIL = process.env.FROM_EMAIL || 'Formula IHU <noreply@fihu.gr>';
+    const FROM_EMAIL = process.env.FROM_EMAIL || 'Formula IHU <info@fihu.gr>';
 
     if (!RESEND_API_KEY) {
       // In development, log the email instead of failing

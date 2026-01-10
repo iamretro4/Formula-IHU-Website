@@ -16,6 +16,8 @@ export const client = createClient({
   dataset,
   useCdn: false, // Changed from true to false
   apiVersion: '2024-01-01',
+  // Note: To query drafts, you may need a token with draft access
+  // For now, we handle draft team references in getResults by querying by exact ID
 });
 
 const builder = imageUrlBuilder(client);

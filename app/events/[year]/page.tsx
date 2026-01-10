@@ -34,16 +34,22 @@ export default async function EventPage({
   ]);
 
   // Get overall results for preview (top 3 from each category)
-  const overallResults = results
-    .filter((r: any) => r.subcategory === 'overall')
-    .sort((a: any, b: any) => {
-      // Sort by category first, then position
-      if (a.category !== b.category) {
-        return a.category.localeCompare(b.category);
-      }
-      return a.position - b.position;
-    })
-    .slice(0, 6);
+  const overallResultsRaw = results.filter((r: any) => r.subcategory === 'overall');
+  
+  // Get top 3 from EV category
+  const evResults = overallResultsRaw
+    .filter((r: any) => r.category === 'EV')
+    .sort((a: any, b: any) => a.position - b.position)
+    .slice(0, 3);
+  
+  // Get top 3 from CV category
+  const cvResults = overallResultsRaw
+    .filter((r: any) => r.category === 'CV')
+    .sort((a: any, b: any) => a.position - b.position)
+    .slice(0, 3);
+  
+  // Combine EV and CV results (EV first, then CV)
+  const overallResults = [...evResults, ...cvResults];
 
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
@@ -93,26 +99,18 @@ export default async function EventPage({
             )}
 
         {/* Quick Info */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          {event.registrationOpen && (
-              <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 hover:shadow-xl transition-all">
-                <h3 className="font-bold text-blue-900 mb-2">Registration Open</h3>
-                {event.registrationDeadline && (
-                  <p className="text-sm text-blue-700">
+        {event.registrationOpen && (
+          <div className="mb-12">
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 hover:shadow-xl transition-all max-w-md">
+              <h3 className="font-bold text-blue-900 mb-2">Registration Open</h3>
+              {event.registrationDeadline && (
+                <p className="text-sm text-blue-700">
                   Deadline: {formatDate(event.registrationDeadline)}
                 </p>
               )}
             </div>
-          )}
-              <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-6 hover:shadow-xl transition-all">
-                <h3 className="font-bold text-gray-900 mb-2">Status</h3>
-                <p className="text-sm text-gray-700 capitalize">{event.status}</p>
-              </div>
-              <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-6 hover:shadow-xl transition-all">
-                <h3 className="font-bold text-gray-900 mb-2">Year</h3>
-                <p className="text-sm text-gray-700">{event.year}</p>
           </div>
-        </div>
+        )}
 
 
         {/* Documents */}
@@ -159,9 +157,15 @@ export default async function EventPage({
                 <div>
                   <h3 className="text-xl font-semibold text-gray-800 mb-4">Overall Standings</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {overallResults.map((result: any, index: number) => (
-                      <ResultCard key={result._id} result={result} index={index} />
-                    ))}
+                    {overallResults.map((result: any, index: number) => {
+                      // Calculate index within category (0-2 for top 3 in each category)
+                      const categoryIndex = result.category === 'EV' 
+                        ? evResults.findIndex((r: any) => r._id === result._id)
+                        : cvResults.findIndex((r: any) => r._id === result._id);
+                      return (
+                        <ResultCard key={result._id} result={result} index={categoryIndex} />
+                      );
+                    })}
                   </div>
                 </div>
               ) : (
@@ -182,38 +186,6 @@ export default async function EventPage({
           )
         ) : null}
 
-        {/* Teams */}
-        {teams.length > 0 ? (
-          <section className="mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-8">Registered Teams ({teams.length})</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {teams.slice(0, 9).map((team: any) => (
-                    <div key={team._id} className="bg-gray-50 border-2 border-gray-200 rounded-xl p-4 hover:border-[#0066FF] hover:shadow-xl transition-all transform hover:-translate-y-2">
-                      <h3 className="font-bold text-gray-900">{team.name}</h3>
-                      <p className="text-sm text-gray-600">{team.university}</p>
-                      {team.country && (
-                        <p className="text-xs text-gray-500 mt-1">{team.country}</p>
-                      )}
-                </div>
-              ))}
-            </div>
-                <Link
-                  href={`/events/${year}/teams`}
-                  className="mt-4 inline-block text-[#0066FF] hover:text-[#0052CC] font-bold"
-                >
-                  View All Teams →
-                </Link>
-          </section>
-        ) : (
-              <section className="mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-8">Registered Teams</h2>
-                <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl p-16 text-center border-2 border-gray-200">
-                  <div className="text-7xl mb-6">🏎️</div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">No Teams Registered Yet</h3>
-                  <p className="text-gray-700 text-lg">Team registrations will appear here once they are confirmed.</p>
-                </div>
-              </section>
-        )}
 
 
       </div>

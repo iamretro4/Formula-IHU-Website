@@ -12,12 +12,6 @@ export default defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({
-      name: 'university',
-      title: 'University',
-      type: 'string',
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
       name: 'country',
       title: 'Country',
       type: 'string',
@@ -64,14 +58,13 @@ export default defineType({
   preview: {
     select: {
       title: 'name',
-      university: 'university',
       country: 'country',
       media: 'logo',
     },
-    prepare({ title, university, country, media }) {
+    prepare({ title, country, media }) {
       return {
         title,
-        subtitle: `${university || 'Unknown'}${country ? `, ${country}` : ''}`,
+        subtitle: country || 'No country',
         media,
       };
     },

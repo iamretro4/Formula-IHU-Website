@@ -31,6 +31,8 @@ export default function SponsorApplicationPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Temporarily disabled
+    return;
     setIsSubmitting(true);
     setSubmitStatus('idle');
 
@@ -134,7 +136,12 @@ export default function SponsorApplicationPage() {
           Interested in sponsoring Formula IHU? We offer various sponsorship tiers with benefits including brand visibility, networking opportunities, and access to talented engineering students.
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Available Soon Banner */}
+        <div className="mb-6 p-4 bg-yellow-50 border-2 border-yellow-300 rounded-lg text-center">
+          <p className="text-lg font-bold text-yellow-900">Available Soon</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6 opacity-60 pointer-events-none">
           <div>
             <label htmlFor="companyName" className="block text-sm font-bold text-gray-900 mb-2">
               Company Name *
@@ -311,12 +318,12 @@ export default function SponsorApplicationPage() {
             disabled={isSubmitting}
             className="w-full px-6 py-4 bg-gradient-primary text-white font-bold rounded-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg"
           >
-            {isSubmitting ? 'Submitting...' : 'Submit Application'}
+            Submit Application
           </button>
 
           {submitStatus === 'success' && (
             <div className="p-4 bg-green-50 border-2 border-green-200 rounded-lg text-green-800">
-              Thank you! Your sponsorship application has been submitted. We'll review it and get back to you soon.
+              Thank you! Your sponsorship application has been submitted. We&apos;ll review it and get back to you soon.
             </div>
           )}
 

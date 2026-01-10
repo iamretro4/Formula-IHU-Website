@@ -48,9 +48,6 @@ export default function ResultCard({ result, index }: ResultCardProps) {
         <h3 className="text-lg font-bold text-gray-900 mb-1">
           {result.team?.name || 'Unknown Team'}
         </h3>
-        {result.team?.university && (
-          <p className="text-sm text-gray-600 mb-2">{result.team.university}</p>
-        )}
         <div className="flex items-center gap-2 mb-3">
           <span className="text-lg font-bold text-primary-blue">{result.points}</span>
           <span className="text-sm text-gray-500">points</span>

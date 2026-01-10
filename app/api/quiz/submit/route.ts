@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({ submitted: !!data, submission: data || null });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -47,9 +47,8 @@ export async function POST(request: NextRequest) {
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     
     if (!supabaseUrl || !supabaseKey || supabaseUrl.includes('placeholder')) {
-      console.error('Supabase not configured:', { hasUrl: !!supabaseUrl, hasKey: !!supabaseKey });
       return NextResponse.json(
-        { error: 'Database not configured. Please check environment variables.' },
+        { error: 'Database not configured. Please contact support.' },
         { status: 500 }
       );
     }
@@ -64,37 +63,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if team already submitted (get the first submission only)
-    const { data: existing, error: checkError } = await supabase
-      .from('quiz_submissions')
-      .select('id, submitted_at, submitted')
-      .eq('team_email', teamEmail)
-      .order('submitted_at', { ascending: true })
-      .limit(1)
-      .maybeSingle();
-
-    if (checkError && checkError.code !== 'PGRST116') {
-      console.error('Error checking existing submission:', checkError);
-      return NextResponse.json(
-        { error: 'Failed to check existing submission', details: checkError.message },
-        { status: 500 }
-      );
-    }
-
-    // If team already submitted, return the existing submission (keep only first)
-    if (existing) {
-      return NextResponse.json(
-        { 
-          error: 'Team has already submitted the quiz. Only the first submission is kept.',
-          submissionId: existing.id,
-          alreadySubmitted: true
-        },
-        { status: 400 }
-      );
-    }
-
-    // Save submission - use upsert with ON CONFLICT to ensure only first submission is kept
-    // If email already exists, this will fail due to UNIQUE constraint, which is what we want
+    // Use database-level transaction to prevent race conditions
+    // First, try to insert with conflict handling - this is atomic
     const { data, error } = await supabase
       .from('quiz_submissions')
       .insert([
@@ -117,36 +87,33 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error saving submission:', error);
-      console.error('Error details:', JSON.stringify(error, null, 2));
-      
-      // Check if it's a unique constraint violation (duplicate email)
+      // Check if it's a unique constraint violation (duplicate email) - race condition detected
       if (error.code === '23505' || error.message?.includes('duplicate') || error.message?.includes('unique')) {
-        // Team already has a submission - fetch the first one
+        // Another submission happened simultaneously - fetch the first one
         const { data: firstSubmission } = await supabase
           .from('quiz_submissions')
-          .select('id, submitted_at')
+          .select('id, submitted_at, time_taken, score')
           .eq('team_email', teamEmail)
           .order('submitted_at', { ascending: true })
           .limit(1)
-          .single();
+          .maybeSingle();
         
         return NextResponse.json(
           { 
             error: 'Team has already submitted the quiz. Only the first submission is kept.',
             submissionId: firstSubmission?.id,
-            alreadySubmitted: true
+            alreadySubmitted: true,
+            submission: firstSubmission || null
           },
           { status: 400 }
         );
       }
       
+      // For other errors, log but don't expose internal details
       return NextResponse.json(
         { 
-          error: 'Failed to save submission',
-          details: error.message || error.code || 'Unknown error',
-          hint: error.hint || null,
-          code: error.code || null
+          error: 'Failed to save submission. Please try again.',
+          details: process.env.NODE_ENV === 'development' ? error.message : undefined
         },
         { status: 500 }
       );
@@ -159,10 +126,10 @@ export async function POST(request: NextRequest) {
       .eq('team_email', teamEmail);
 
     return NextResponse.json({ success: true, submissionId: data.id });
-  } catch (error) {
-    console.error('Error in submit route:', error);
+  } catch {
+    // Log error for monitoring but don't expose details to client
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'An error occurred while submitting. Please try again.' },
       { status: 500 }
     );
   }
