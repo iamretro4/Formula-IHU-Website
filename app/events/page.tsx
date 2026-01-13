@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { getEvents } from '@/lib/sanity.queries';
 import { urlFor } from '@/sanity/lib/image';
 import Image from 'next/image';
+import { generateMetadata as generateSEOMetadata, generateBreadcrumbStructuredData } from "@/lib/seo";
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 const statusLabels: Record<string, string> = {
   upcoming: 'Upcoming',
@@ -18,6 +20,12 @@ const statusColors: Record<string, string> = {
 // Revalidate this page every 60 seconds (fallback if webhook fails)
 export const revalidate = 60;
 
+export const metadata = generateSEOMetadata({
+  title: "Events",
+  description: "Browse all Formula IHU events, past and present. Find information about upcoming competitions, schedules, and results.",
+  url: "/events",
+});
+
 export default async function EventsPage() {
   const allEvents = await getEvents().catch(() => []);
   
@@ -31,11 +39,30 @@ export default async function EventsPage() {
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   };
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://fihu.gr';
+  const breadcrumbData = generateBreadcrumbStructuredData([
+    { name: 'Home', url: `${siteUrl}/` },
+    { name: 'Events', url: `${siteUrl}/events` },
+  ]);
+
   return (
-    <div className="bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="mb-12">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">Event Archive</h1>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbData),
+        }}
+      />
+      <div className="bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+          <Breadcrumbs
+            items={[
+              { label: 'Events' },
+            ]}
+            className="mb-6"
+          />
+          <div className="mb-12">
+            <h1 className="text-5xl font-bold text-gray-900 mb-4">Event Archive</h1>
           <p className="text-xl text-gray-700">
             Browse all Formula IHU events, past and present.
           </p>
@@ -56,9 +83,10 @@ export default async function EventsPage() {
                     <div className="relative h-48 w-full">
                       <Image
                         src={urlFor(event.featuredImage).width(400).height(200).url()}
-                        alt={event.title}
+                        alt={`${event.title} - Formula IHU ${event.year} competition event`}
                         fill
                         className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
                     </div>
                   )}
@@ -96,9 +124,10 @@ export default async function EventsPage() {
                     <div className="relative h-48 w-full">
                       <Image
                         src={urlFor(event.featuredImage).width(400).height(200).url()}
-                        alt={event.title}
+                        alt={`${event.title} - Formula IHU ${event.year} competition event`}
                         fill
                         className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
                     </div>
                   )}
@@ -136,9 +165,10 @@ export default async function EventsPage() {
                     <div className="relative h-48 w-full">
                       <Image
                         src={urlFor(event.featuredImage).width(400).height(200).url()}
-                        alt={event.title}
+                        alt={`${event.title} - Formula IHU ${event.year} competition event`}
                         fill
                         className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
                     </div>
                   )}
@@ -170,6 +200,7 @@ export default async function EventsPage() {
         )}
       </div>
     </div>
+    </>
   );
 }
 

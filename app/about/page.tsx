@@ -1,8 +1,16 @@
 import { getPageContent } from '@/lib/sanity.queries';
 import ImageCarousel from '@/components/ImageCarousel';
+import { generateMetadata as generateSEOMetadata, generateBreadcrumbStructuredData } from "@/lib/seo";
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 // Revalidate this page every 60 seconds (fallback if webhook fails)
 export const revalidate = 60;
+
+export const metadata = generateSEOMetadata({
+  title: "About",
+  description: "Learn about Formula IHU, the official Formula Student Competition in Greece. Discover our mission, history, and commitment to engineering excellence.",
+  url: "/about",
+});
 
 export default async function AboutPage() {
   const pageContent = await getPageContent('about').catch(() => null);
@@ -24,13 +32,32 @@ export default async function AboutPage() {
     { url: '/images/about/2025Event6.jpeg', alt: 'Formula IHU 2025 Event' },
   ];
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://fihu.gr';
+  const breadcrumbData = generateBreadcrumbStructuredData([
+    { name: 'Home', url: `${siteUrl}/` },
+    { name: 'About', url: `${siteUrl}/about` },
+  ]);
+
   return (
-    <div className="bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6 sm:mb-8">
-            {pageContent?.title || 'About Formula IHU'}
-          </h1>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbData),
+        }}
+      />
+      <div className="bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+          <div className="max-w-3xl mx-auto">
+            <Breadcrumbs
+              items={[
+                { label: 'About' },
+              ]}
+              className="mb-6"
+            />
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6 sm:mb-8">
+              {pageContent?.title || 'About Formula IHU'}
+            </h1>
 
           {/* Photo Carousel at the top */}
           <div className="mb-12">
@@ -110,9 +137,10 @@ export default async function AboutPage() {
               vehicles but also the business acumen and presentation skills of the teams.
             </p>
           </div>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

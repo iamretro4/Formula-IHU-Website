@@ -5,9 +5,17 @@ import StatisticsSection from '@/components/StatisticsSection';
 import { getFeaturedNews, getDocuments, getHomePageContent, getEvents } from '@/lib/sanity.queries';
 import Link from 'next/link';
 import { ArrowRight, FileText, Users, Mail } from 'lucide-react';
+import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
+import { generateStructuredData } from "@/lib/seo";
 
 // Revalidate this page every 60 seconds (fallback if webhook fails)
 export const revalidate = 60;
+
+export const metadata = generateSEOMetadata({
+  title: "Home",
+  description: "Formula IHU is the official Formula Student Competition held in Greece. Join us for an international competition where engineering meets real-world challenge.",
+  url: "/",
+});
 
 export default async function Home() {
   // Fetch data from Sanity (will work once CMS is configured)
@@ -79,8 +87,30 @@ export default async function Home() {
     ? `Formula IHU ${nextEvent.year} will take place from ${formatDateRange(nextEvent.startDate, nextEvent.endDate)} at ${nextEvent.venue || nextEvent.location || 'Serres Racing Circuit'}. University teams from around the world design, build and race formula-style cars in an international competition where engineering meets real-world challenge.`
     : homePageContent?.competitionDescription || 'Formula IHU 2025 will take place from August 26 to 31 at Serres Racing Circuit. University teams from around the world design, build and race formula-style cars in an international competition where engineering meets real-world challenge.';
 
+  // Generate structured data for the next event
+  const eventStructuredData = nextEvent ? generateStructuredData({
+    type: 'Event',
+    data: {
+      name: competitionTitle,
+      description: competitionDescription,
+      startDate: nextEvent.startDate,
+      endDate: nextEvent.endDate,
+      locationName: nextEvent.venue || nextEvent.location || 'Serres Racing Circuit',
+      addressLocality: 'Serres',
+    },
+  }) : null;
+
   return (
-    <div className="flex flex-col">
+    <>
+      {eventStructuredData && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(eventStructuredData),
+          }}
+        />
+      )}
+      <div className="flex flex-col">
       <Hero />
       
       {/* Competition Info Section */}
@@ -178,5 +208,6 @@ export default async function Home() {
         </div>
       </section>
     </div>
+    </>
   );
 }

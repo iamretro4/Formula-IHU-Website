@@ -2,6 +2,13 @@ import { getSponsors } from '@/lib/sanity.queries';
 import { urlFor } from '@/sanity/lib/image';
 import Image from 'next/image';
 import Link from 'next/link';
+import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
+
+export const metadata = generateSEOMetadata({
+  title: "Sponsors",
+  description: "Meet our partners and sponsors who make Formula IHU possible. Join us in supporting the next generation of engineers.",
+  url: "/sponsors",
+});
 
 const tierOrder = ['title-partner', 'premium-partner', 'gold-partner', 'silver-partner', 'bronze-partner', 'supporter'];
 const tierLabels: Record<string, string> = {

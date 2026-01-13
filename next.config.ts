@@ -14,7 +14,14 @@ const nextConfig: NextConfig = {
         hostname: 'cdn.sanity.io',
       },
     ],
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60,
   },
+  // Performance optimizations
+  compress: true,
+  poweredByHeader: false,
+  // Enable React strict mode for better development experience
+  reactStrictMode: true,
 };
 
 export default nextConfig;

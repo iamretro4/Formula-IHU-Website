@@ -166,7 +166,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Send email via Resend API with retry logic
-    let lastError: Error | null = null;
     const maxRetries = 2;
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {

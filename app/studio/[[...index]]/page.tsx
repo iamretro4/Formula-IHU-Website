@@ -76,33 +76,34 @@ const Studio = dynamic(
   }
 );
 
+const getClientEnv = () => {
+  if (typeof window === 'undefined') return null;
+  return {
+    hasProjectId: !!(window as any).__NEXT_DATA__?.env?.NEXT_PUBLIC_SANITY_PROJECT_ID || 
+                   process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
+    projectId: (window as any).__NEXT_DATA__?.env?.NEXT_PUBLIC_SANITY_PROJECT_ID || 
+               process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'NOT AVAILABLE IN CLIENT',
+    hasDataset: !!(window as any).__NEXT_DATA__?.env?.NEXT_PUBLIC_SANITY_DATASET || 
+                process.env.NEXT_PUBLIC_SANITY_DATASET,
+  };
+};
+
 export default function StudioPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [isClient, setIsClient] = useState(false);
-  const [debugInfo, setDebugInfo] = useState<any>(null);
-
-  // Check client-side environment variables (NEXT_PUBLIC_ vars are embedded at build time)
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const clientEnv = {
-        hasProjectId: !!(window as any).__NEXT_DATA__?.env?.NEXT_PUBLIC_SANITY_PROJECT_ID || 
-                       process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
-        projectId: (window as any).__NEXT_DATA__?.env?.NEXT_PUBLIC_SANITY_PROJECT_ID || 
-                   process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'NOT AVAILABLE IN CLIENT',
-        hasDataset: !!(window as any).__NEXT_DATA__?.env?.NEXT_PUBLIC_SANITY_DATASET || 
-                    process.env.NEXT_PUBLIC_SANITY_DATASET,
-      };
-      setDebugInfo(clientEnv);
-      
+  const [isClient] = useState(true);
+  const [debugInfo] = useState<any>(() => {
+    const clientEnv = getClientEnv();
+    if (clientEnv) {
       // Log for debugging
       console.log('Client-side env check:', clientEnv);
       if (!clientEnv.hasProjectId) {
         console.error('⚠️ NEXT_PUBLIC_SANITY_PROJECT_ID is not available in the client bundle. This means it was missing during build time.');
       }
     }
-  }, []);
+    return clientEnv;
+  });
 
   const checkAuth = async () => {
     try {
@@ -122,7 +123,6 @@ export default function StudioPage() {
   };
 
   useEffect(() => {
-    setIsClient(true);
     checkAuth();
   }, []);
 

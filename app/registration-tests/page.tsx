@@ -356,28 +356,28 @@ export default function RegistrationTestsPage() {
     // Submit to API with retry logic for network issues
     const submitWithRetry = async (retries = 3): Promise<Response> => {
       for (let attempt = 1; attempt <= retries; attempt++) {
-        try {
-          const response = await fetch('/api/quiz/submit', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              teamName: teamInfo.name,
-              teamEmail: teamInfo.email,
-              vehicleCategory: teamInfo.vehicleCategory,
-              preferredTeamNumber: teamInfo.preferredTeamNumber,
-              alternativeTeamNumber: teamInfo.alternativeTeamNumber,
-              fuelType: teamInfo.fuelType,
-              answers,
-              timeTaken: timeDiff,
-              score: finalScore,
-              questions: filteredQuestions.map(q => ({
-                id: q.id,
-                text: q.text,
-                options: q.options,
-                correctOption: q.correctOption,
-              })),
-            }),
-          });
+    try {
+      const response = await fetch('/api/quiz/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          teamName: teamInfo.name,
+          teamEmail: teamInfo.email,
+          vehicleCategory: teamInfo.vehicleCategory,
+          preferredTeamNumber: teamInfo.preferredTeamNumber,
+          alternativeTeamNumber: teamInfo.alternativeTeamNumber,
+          fuelType: teamInfo.fuelType,
+          answers,
+          timeTaken: timeDiff,
+          score: finalScore,
+          questions: filteredQuestions.map(q => ({
+            id: q.id,
+            text: q.text,
+            options: q.options,
+            correctOption: q.correctOption,
+          })),
+        }),
+      });
           
           // If successful or client error (4xx), return immediately
           if (response.ok || response.status < 500) {

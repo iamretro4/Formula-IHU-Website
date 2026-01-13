@@ -1,8 +1,15 @@
 import { getPageContent } from '@/lib/sanity.queries';
 import Link from 'next/link';
+import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 
 // Revalidate this page every 60 seconds (fallback if webhook fails)
 export const revalidate = 60;
+
+export const metadata = generateSEOMetadata({
+  title: "Join Us",
+  description: "Become a judge, scrutineer, volunteer, or sponsor for Formula IHU. Help us make the competition a success.",
+  url: "/join-us",
+});
 
 export default async function JoinUsPage() {
   const pageContent = await getPageContent('join-us').catch(() => null);

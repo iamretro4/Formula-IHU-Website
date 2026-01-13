@@ -156,7 +156,7 @@ export async function getEventByYear(year: number) {
 
 // Results queries
 export async function getResults(eventId?: string, category?: string, subcategory?: string) {
-  let filters = [];
+  const filters = [];
   if (eventId) filters.push(`event._ref == "${eventId}"`);
   if (category) filters.push(`category == "${category}"`);
   if (subcategory) filters.push(`subcategory == "${subcategory}"`);

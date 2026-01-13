@@ -41,8 +41,9 @@ A modern, responsive website for Formula IHU - the official Formula Student Comp
 
 3. Set up environment variables:
    ```bash
-   cp .env.local.example .env.local
+   cp .env.example .env.local
    ```
+   Then edit `.env.local` and fill in your actual values (see `.env.example` for all required variables)
 
 4. Configure Sanity:
    - Create a new project at [sanity.io](https://www.sanity.io)

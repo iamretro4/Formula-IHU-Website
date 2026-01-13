@@ -2,6 +2,13 @@ import { getDocuments } from '@/lib/sanity.queries';
 import DocumentCard from '@/components/DocumentCard';
 import { FileText, Download, ExternalLink } from 'lucide-react';
 import Card from '@/components/ui/Card';
+import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
+
+export const metadata = generateSEOMetadata({
+  title: "Rules & Documents",
+  description: "Download competition rules, handbooks, and official documents for Formula IHU. Stay up to date with the latest regulations.",
+  url: "/rules",
+});
 
 const categoryLabels: Record<string, string> = {
   handbook: 'Competition Handbook',

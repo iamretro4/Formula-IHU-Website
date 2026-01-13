@@ -5,9 +5,48 @@ import Image from 'next/image';
 import Link from 'next/link';
 import DocumentCard from '@/components/DocumentCard';
 import ResultCard from '@/components/ResultCard';
+import { generateMetadata as generateSEOMetadata } from '@/lib/seo';
+import { generateStructuredData } from '@/lib/seo';
+import type { Metadata } from 'next';
 
 // Revalidate this page every 60 seconds (fallback if webhook fails)
 export const revalidate = 60;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ year: string }>;
+}): Promise<Metadata> {
+  const { year } = await params;
+  const yearNum = parseInt(year);
+  
+  if (isNaN(yearNum)) {
+    return generateSEOMetadata({ title: "Event Not Found" });
+  }
+
+  const event = await getEventByYear(yearNum).catch(() => null);
+  
+  if (!event) {
+    return generateSEOMetadata({ title: "Event Not Found" });
+  }
+
+  const eventImageUrl = event.featuredImage
+    ? urlFor(event.featuredImage).width(1200).height(630).url()
+    : undefined;
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    return new Date(dateString).toISOString();
+  };
+
+  return generateSEOMetadata({
+    title: event.title || `Formula IHU ${year}`,
+    description: event.description || `Join Formula IHU ${year} - The official Formula Student Competition in Greece. ${event.location ? `Held in ${event.location}.` : ''} ${event.startDate ? `Event dates: ${new Date(event.startDate).toLocaleDateString()}` : ''}`,
+    image: eventImageUrl,
+    url: `/events/${year}`,
+    type: 'website',
+  });
+}
 
 export default async function EventPage({
   params,
@@ -57,15 +96,80 @@ export default async function EventPage({
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   };
 
+  const formatDateISO = (dateString: string) => {
+    if (!dateString) return '';
+    return new Date(dateString).toISOString();
+  };
+
+  // Generate Event structured data
+  const eventStructuredData = generateStructuredData({
+    type: 'Event',
+    data: {
+      name: event.title,
+      startDate: formatDateISO(event.startDate),
+      endDate: formatDateISO(event.endDate),
+      locationName: event.venue || event.location || 'Serres, Greece',
+      addressLocality: event.location?.includes('Serres') ? 'Serres' : 'Serres',
+      description: event.description || `${event.title} - Formula Student Competition in Greece`,
+      image: event.featuredImage ? urlFor(event.featuredImage).width(1200).height(630).url() : undefined,
+      ...(event.registrationOpen && {
+        offers: {
+          '@type': 'Offer',
+          availability: 'https://schema.org/InStock',
+          url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://fihu.gr'}/events/${year}`,
+        },
+      }),
+    },
+  });
+
+  // Breadcrumb structured data
+  const breadcrumbStructuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://fihu.gr'}/`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Events',
+        item: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://fihu.gr'}/events`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: event.title,
+        item: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://fihu.gr'}/events/${year}`,
+      },
+    ],
+  };
+
   return (
-    <div className="bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {/* Header */}
-        <div className="mb-8">
-          <Link href="/events" className="text-[#0066FF] hover:text-[#0052CC] mb-4 inline-block font-bold">
-            ← Back to Events
-          </Link>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">{event.title}</h1>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(eventStructuredData),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbStructuredData),
+        }}
+      />
+      <div className="bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          {/* Header */}
+          <div className="mb-8">
+            <Link href="/events" className="text-[#0066FF] hover:text-[#0052CC] mb-4 inline-block font-bold">
+              ← Back to Events
+            </Link>
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">{event.title}</h1>
           <div className="flex flex-wrap gap-4 text-gray-700">
             <span>{formatDate(event.startDate)} - {formatDate(event.endDate)}</span>
             <span>•</span>
@@ -190,6 +294,7 @@ export default async function EventPage({
 
       </div>
     </div>
+    </>
   );
 }
 
