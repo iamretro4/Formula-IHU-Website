@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Resend } from 'resend';
 
 // Email template for quiz submission confirmation
 function generateEmailTemplate(
@@ -165,58 +166,61 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Initialize Resend client
+    const resend = new Resend(RESEND_API_KEY);
+
     // Send email via Resend API with retry logic
     const maxRetries = 2;
+    let lastError: Error | null = null;
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        const response = await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${RESEND_API_KEY}`,
-          },
-          body: JSON.stringify({
-            from: FROM_EMAIL,
-            to: [teamEmail],
-            reply_to: 'quiz@fihu.gr',
-            subject: 'Quiz Submission Confirmation - Formula IHU',
-            html: emailHtml,
-          }),
+        const { data, error } = await resend.emails.send({
+          from: FROM_EMAIL,
+          to: [teamEmail],
+          replyTo: 'quiz@fihu.gr',
+          subject: 'Quiz Submission Confirmation - Formula IHU',
+          html: emailHtml,
         });
 
-        const responseData = await response.json();
+        if (error) {
+          // If it's a client error (4xx), don't retry
+          if (error.statusCode && error.statusCode >= 400 && error.statusCode < 500) {
+            console.error('Resend API client error:', error);
+            return NextResponse.json(
+              { 
+                success: false,
+                error: 'Email service error',
+                message: 'Submission was successful, but email could not be sent. Please contact support if you need a confirmation.',
+                details: process.env.NODE_ENV === 'development' ? error.message : undefined
+              },
+              { status: 200 } // Return 200 so it doesn't fail the submission
+            );
+          }
+          
+          // Server error (5xx) - will retry
+          lastError = new Error(error.message || 'Resend API error');
+          if (attempt < maxRetries) {
+            // Wait before retry (exponential backoff)
+            await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+            continue;
+          }
+        }
 
-        if (response.ok) {
+        if (data) {
           return NextResponse.json(
             { 
               success: true, 
               message: 'Email sent successfully',
-              emailId: responseData.id
+              emailId: data.id
             },
             { status: 200 }
           );
         }
-
-        // If it's a client error (4xx), don't retry
-        if (response.status >= 400 && response.status < 500) {
-          return NextResponse.json(
-            { 
-              success: false,
-              error: 'Email service error',
-              message: 'Submission was successful, but email could not be sent. Please contact support if you need a confirmation.',
-              details: process.env.NODE_ENV === 'development' ? responseData.message : undefined
-            },
-            { status: 200 } // Return 200 so it doesn't fail the submission
-          );
-        }
-
-        // Server error (5xx) - will retry
-        if (attempt < maxRetries) {
-          // Wait before retry (exponential backoff)
-          await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
-        }
-      } catch {
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+        console.error(`Email send attempt ${attempt} failed:`, lastError);
+        
         if (attempt < maxRetries) {
           // Wait before retry (exponential backoff)
           await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
@@ -225,22 +229,26 @@ export async function POST(request: NextRequest) {
     }
 
     // All retries failed - return success but note email failure
+    console.error('Email sending failed after all retries:', lastError);
     return NextResponse.json(
       { 
         success: false,
         error: 'Email sending failed after retries',
-        message: 'Submission was successful, but email could not be sent after multiple attempts. Please contact support if you need a confirmation.'
+        message: 'Submission was successful, but email could not be sent after multiple attempts. Please contact support if you need a confirmation.',
+        details: process.env.NODE_ENV === 'development' ? (lastError?.message || 'Unknown error') : undefined
       },
       { status: 200 } // Return 200 so it doesn't fail the submission
     );
 
-  } catch {
+  } catch (error) {
     // Unexpected error - return success but note email failure
+    console.error('Unexpected error in send-quiz-email:', error);
     return NextResponse.json(
       { 
         success: false,
         error: 'Unexpected error',
-        message: 'Submission was successful, but email could not be sent. Please contact support if you need a confirmation.'
+        message: 'Submission was successful, but email could not be sent. Please contact support if you need a confirmation.',
+        details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
       },
       { status: 200 } // Return 200 so it doesn't fail the submission
     );

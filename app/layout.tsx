@@ -4,6 +4,7 @@ import "./globals.css";
 import ConditionalLayoutWrapper from "./conditional-layout-wrapper";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { generateStructuredData } from "@/lib/seo";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -63,6 +64,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <ConditionalLayoutWrapper>{children}</ConditionalLayoutWrapper>
+        <Analytics />
       </body>
     </html>
   );

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Resend } from 'resend';
 
 function generateFormNotificationEmail(
   formType: string,
@@ -156,33 +157,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Initialize Resend client
+    const resend = new Resend(RESEND_API_KEY);
+
     // Send email via Resend API
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: FROM_EMAIL,
-        to: recipientEmails,
-        subject: `New ${formType.charAt(0).toUpperCase() + formType.slice(1)} Application - Formula IHU`,
-        html: emailHtml,
-      }),
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: recipientEmails,
+      subject: `New ${formType.charAt(0).toUpperCase() + formType.slice(1)} Application - Formula IHU`,
+      html: emailHtml,
     });
 
-    const responseData = await response.json();
-
-    if (!response.ok) {
-      console.error('Resend API error:', responseData);
-      throw new Error(responseData.message || 'Failed to send email');
+    if (error) {
+      console.error('Resend API error:', error);
+      return NextResponse.json(
+        { 
+          error: 'Failed to send email', 
+          details: error.message || 'Unknown error',
+          statusCode: error.statusCode
+        },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json(
       { 
         success: true, 
         message: 'Email sent successfully',
-        emailId: responseData.id
+        emailId: data?.id
       },
       { status: 200 }
     );

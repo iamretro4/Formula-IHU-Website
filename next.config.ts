@@ -22,6 +22,8 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   // Enable React strict mode for better development experience
   reactStrictMode: true,
+  // Note: The lockfile warning can be safely ignored if you have a lockfile in your home directory
+  // It doesn't affect the build or functionality
 };
 
 export default nextConfig;

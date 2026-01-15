@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Instagram, Linkedin, Mail, MapPin } from 'lucide-react';
+import { Instagram, Linkedin, Mail } from 'lucide-react';
 
 interface FooterClientProps {
   events: any[];
@@ -30,12 +30,11 @@ export default function FooterClient({ events, siteSettings }: FooterClientProps
   ];
   
   const socialLinks = siteSettings?.social || {
-    instagram: 'https://www.instagram.com',
-    linkedin: 'https://www.linkedin.com',
+    instagram: 'https://www.instagram.com/formula.ihu/',
+    linkedin: 'https://www.linkedin.com/company/formula-ihu/posts/?feedView=all',
   };
   
   const contact = siteSettings?.contact || {
-    address: 'Thessaloniki, Greece',
     email: 'info.formulaihu@ihu.gr',
     technicalEmail: 'technical.formulaihu@ihu.gr',
   };
@@ -140,12 +139,6 @@ export default function FooterClient({ events, siteSettings }: FooterClientProps
             )}
             <h3 className="text-lg font-semibold text-white mb-4">Contact</h3>
             <ul className="space-y-3 text-sm">
-              {contact.address && (
-                <li className="flex items-center gap-2 text-gray-400">
-                  <MapPin className="w-4 h-4 text-primary-blue" />
-                  <span>{contact.address}</span>
-                </li>
-              )}
               {contact.email && (
                 <li>
                   <a
