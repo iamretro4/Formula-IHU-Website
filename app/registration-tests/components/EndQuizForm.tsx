@@ -125,11 +125,8 @@ const EndQuizForm: React.FC<EndQuizFormProps> = ({ teamInfo, setTeamInfo, onSubm
                 required
               >
                 <option value="">Select fuel type</option>
-                <option value="Gasoline">Gasoline</option>
+                <option value="RON98">RON98</option>
                 <option value="E85">E85</option>
-                <option value="E100">E100</option>
-                <option value="Diesel">Diesel</option>
-                <option value="Other">Other</option>
               </select>
               {errors.fuelType && (
                 <p className="mt-1 text-sm text-red-600">{errors.fuelType}</p>

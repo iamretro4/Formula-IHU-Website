@@ -185,11 +185,6 @@ export default function ContactPage() {
             <h2 className="text-2xl font-semibold text-gray-900 mb-6">Get in Touch</h2>
             <div className="space-y-8">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Location</h3>
-                <p className="text-gray-600">Thessaloniki, Greece</p>
-              </div>
-
-              <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Email</h3>
                 <div className="space-y-2">
                   <a

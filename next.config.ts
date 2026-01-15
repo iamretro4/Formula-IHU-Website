@@ -22,6 +22,9 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   // Enable React strict mode for better development experience
   reactStrictMode: true,
+  // Turbopack configuration (Next.js 16 uses Turbopack by default)
+  // Empty config to silence the warning about webpack/turbopack conflict
+  turbopack: {},
   // Note: The lockfile warning can be safely ignored if you have a lockfile in your home directory
   // It doesn't affect the build or functionality
 };

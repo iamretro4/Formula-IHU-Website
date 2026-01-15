@@ -6,7 +6,8 @@ function generateEmailTemplate(
   teamName: string,
   timeTaken: number,
   questions: Array<{ id: number; text: string; options: string[] }>,
-  answers: Record<number, string>
+  answers: Record<number, string>,
+  baseUrl: string = 'https://fihu.gr'
 ): string {
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -47,9 +48,9 @@ function generateEmailTemplate(
               <table role="presentation" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
                 <!-- Header -->
                 <tr>
-                  <td style="padding: 40px 40px 20px; text-align: center; background: linear-gradient(135deg, #0066FF 0%, #0044CC 100%); border-radius: 8px 8px 0 0;">
-                    <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">Formula IHU</h1>
-                    <p style="margin: 8px 0 0; color: #e0e7ff; font-size: 16px;">Registration Quiz Submission</p>
+                  <td style="padding: 40px 40px 20px; text-align: center; background-color: #ffffff; border-radius: 8px 8px 0 0; border-bottom: 2px solid #e5e7eb;">
+                    <img src="${baseUrl}/logo.png" alt="Formula IHU" style="max-width: 200px; height: auto; margin-bottom: 16px; display: block; margin-left: auto; margin-right: auto;" />
+                    <p style="margin: 8px 0 0; color: #6b7280; font-size: 16px;">Registration Quiz Submission</p>
                   </td>
                 </tr>
                 
@@ -82,7 +83,7 @@ function generateEmailTemplate(
                         The correct answers and official rankings will be released after the quiz period has ended for all teams.
                       </p>
                       <p style="margin: 0; color: #6b7280; font-size: 14px; line-height: 1.6;">
-                        If you have any questions, please contact us at{' '}
+                        If you have any questions, please contact us at
                         <a href="mailto:quiz@fihu.gr" style="color: #0066FF; text-decoration: none;">quiz@fihu.gr</a>
                       </p>
                     </div>
@@ -122,8 +123,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get base URL for logo and links
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
+                    process.env.NEXT_PUBLIC_DOMAIN ? `https://${process.env.NEXT_PUBLIC_DOMAIN}` :
+                    new URL(request.url).origin;
+
     // Generate email HTML
-    const emailHtml = generateEmailTemplate(teamName, timeTaken, questions, answers);
+    const emailHtml = generateEmailTemplate(teamName, timeTaken, questions, answers, baseUrl);
 
     // Send email using Resend (or your preferred email service)
     const RESEND_API_KEY = process.env.RESEND_API_KEY;

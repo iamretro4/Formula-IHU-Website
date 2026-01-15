@@ -25,13 +25,27 @@ export default function TestEmailPage() {
         }),
       });
 
-      const data = await response.json();
-      setResult(data);
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const data = await response.json();
+        setResult(data);
+      } else {
+        // Response is not JSON (likely HTML error page)
+        const textResponse = await response.text();
+        setResult({
+          success: false,
+          error: 'Invalid response from server',
+          message: `Server returned non-JSON response (status ${response.status}). The API endpoint may have an error.`,
+          details: textResponse.substring(0, 500),
+        });
+      }
     } catch (error) {
       setResult({
         success: false,
         error: 'Request failed',
         message: error instanceof Error ? error.message : 'Unknown error',
+        details: error instanceof Error ? error.stack : undefined,
       });
     } finally {
       setLoading(false);

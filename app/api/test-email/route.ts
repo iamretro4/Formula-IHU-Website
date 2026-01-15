@@ -122,10 +122,42 @@ export async function POST(request: NextRequest) {
       }
     );
 
-    const emailResult = await emailResponse.json();
+    // Check if response is JSON before parsing
+    const contentType = emailResponse.headers.get('content-type');
+    let emailResult;
+    
+    if (contentType && contentType.includes('application/json')) {
+      try {
+        emailResult = await emailResponse.json();
+      } catch (parseError) {
+        // If JSON parsing fails, return error
+        return NextResponse.json({
+          success: false,
+          test: true,
+          error: 'Failed to parse email service response',
+          message: 'The email service returned an invalid response. Please check the server logs.',
+          details: process.env.NODE_ENV === 'development' 
+            ? `Parse error: ${parseError instanceof Error ? parseError.message : String(parseError)}` 
+            : undefined,
+        }, { status: 500 });
+      }
+    } else {
+      // Response is not JSON (likely HTML error page)
+      const textResponse = await emailResponse.text();
+      return NextResponse.json({
+        success: false,
+        test: true,
+        error: 'Email service returned non-JSON response',
+        message: `The email service returned an error (status ${emailResponse.status}). This usually means the API endpoint has an error.`,
+        details: process.env.NODE_ENV === 'development' 
+          ? `Response preview: ${textResponse.substring(0, 200)}...` 
+          : undefined,
+        statusCode: emailResponse.status,
+      }, { status: 500 });
+    }
 
     return NextResponse.json({
-      success: emailResponse.ok,
+      success: emailResponse.ok && emailResult?.success !== false,
       test: true,
       emailResult,
       testData: {
@@ -135,7 +167,7 @@ export async function POST(request: NextRequest) {
         questionsCount: testQuestions.length,
         answersCount: Object.keys(testAnswers).length,
       },
-      message: emailResult.success
+      message: emailResult?.success !== false
         ? '✅ Test email sent successfully!'
         : '⚠️ Email sending failed (check emailResult for details)',
     });

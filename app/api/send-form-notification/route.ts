@@ -3,7 +3,8 @@ import { Resend } from 'resend';
 
 function generateFormNotificationEmail(
   formType: string,
-  formData: Record<string, any>
+  formData: Record<string, any>,
+  baseUrl: string = 'https://fihu.gr'
 ): string {
   const formatField = (label: string, value: any): string => {
     if (!value || value === '') return '';
@@ -48,9 +49,9 @@ function generateFormNotificationEmail(
               <table role="presentation" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
                 <!-- Header -->
                 <tr>
-                  <td style="padding: 40px 40px 20px; text-align: center; background: linear-gradient(135deg, #0066FF 0%, #0044CC 100%); border-radius: 8px 8px 0 0;">
-                    <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">Formula IHU</h1>
-                    <p style="margin: 8px 0 0; color: #e0e7ff; font-size: 16px;">New ${formTypeLabels[formType] || formType}</p>
+                  <td style="padding: 40px 40px 20px; text-align: center; background-color: #ffffff; border-radius: 8px 8px 0 0; border-bottom: 2px solid #e5e7eb;">
+                    <img src="${baseUrl}/logo.png" alt="Formula IHU" style="max-width: 200px; height: auto; margin-bottom: 16px; display: block; margin-left: auto; margin-right: auto;" />
+                    <p style="margin: 8px 0 0; color: #6b7280; font-size: 16px;">New ${formTypeLabels[formType] || formType}</p>
                   </td>
                 </tr>
                 
@@ -119,8 +120,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get base URL for logo and links
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
+                    process.env.NEXT_PUBLIC_DOMAIN ? `https://${process.env.NEXT_PUBLIC_DOMAIN}` :
+                    new URL(request.url).origin;
+
     // Generate email HTML
-    const emailHtml = generateFormNotificationEmail(formType, formData);
+    const emailHtml = generateFormNotificationEmail(formType, formData, baseUrl);
 
     // Get email configuration
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
