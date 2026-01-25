@@ -2,9 +2,16 @@
 export interface Question {
   id: number;
   text: string;
-  options: string[];
-  correctOption: string;
+  type?: 'multiple_choice' | 'open_text'; // Question type
+  options?: string[]; // Only for multiple choice questions
+  correctOption?: string; // SECURITY: Not sent to client, only used server-side
   image?: string | null; // Optional image URL
+  file?: {
+    url: string;
+    filename: string;
+    size?: number;
+    mimeType?: string;
+  } | null; // Optional file to download
   category?: 'common' | 'EV' | 'CV'; // Question category
 }
 

@@ -23,6 +23,7 @@ export async function GET() {
       scheduledStartTime,
       questions[] {
         text,
+        type,
         options,
         correctOption,
         category,
@@ -36,6 +37,15 @@ export async function GET() {
                 height
               }
             }
+          }
+        },
+        file {
+          asset-> {
+            _id,
+            url,
+            originalFilename,
+            size,
+            mimeType
           }
         }
       },
@@ -58,9 +68,16 @@ export async function GET() {
     const transformedQuestions = (quiz.questions || []).map((q: any, index: number) => ({
       id: q.id || (index + 1),
       text: q.text,
+      type: q.type || 'multiple_choice', // Default to multiple_choice for backward compatibility
       options: q.options || [],
       correctOption: q.correctOption,
       image: q.image?.asset?.url || null,
+      file: q.file?.asset ? {
+        url: q.file.asset.url,
+        filename: q.file.asset.originalFilename || 'download',
+        size: q.file.asset.size,
+        mimeType: q.file.asset.mimeType,
+      } : null,
       category: q.category || 'common',
     }));
 

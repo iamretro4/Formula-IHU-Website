@@ -174,9 +174,17 @@ export default function RegistrationTestsPage() {
             setAnswers(progress.answers || {});
             const savedStartTime = new Date(progress.start_time);
             setStartTime(savedStartTime);
-            const quizDuration = quizData ? (quizData.endTime.getTime() - quizData.globalStartTime.getTime()) : 5 * 60 * 1000;
-            setEndTime(new Date(savedStartTime.getTime() + quizDuration));
-            setAppState('active');
+            // FIX: Use global end time instead of calculating from start time
+            const globalEndTime = quizData.endTime;
+            const now = new Date();
+            // Only restore if quiz hasn't ended globally
+            if (now < globalEndTime) {
+              setEndTime(globalEndTime);
+              setAppState('active');
+            } else {
+              // Quiz has ended globally, don't restore active state
+              setAppState('ready');
+            }
           }
         }
       } catch (error) {
@@ -289,6 +297,22 @@ export default function RegistrationTestsPage() {
   const handleStart = useCallback(() => {
     if (!quizData || !teamInfo.vehicleCategory) return;
     
+    const now = new Date();
+    const globalEndTime = quizData.endTime;
+    
+    // FIX: Validate that quiz hasn't ended globally
+    if (now >= globalEndTime) {
+      alert('The quiz has ended. You cannot start the quiz at this time.');
+      return;
+    }
+    
+    // FIX: Ensure minimum time remaining (at least 30 seconds)
+    const timeRemaining = globalEndTime.getTime() - now.getTime();
+    if (timeRemaining < 30000) {
+      alert('Less than 30 seconds remaining. The quiz cannot be started.');
+      return;
+    }
+    
     // Filter questions based on vehicle category
     const filteredQuestions = quizData.questions.filter((q: any) => 
       !q.category || q.category === 'common' || q.category === teamInfo.vehicleCategory
@@ -300,9 +324,7 @@ export default function RegistrationTestsPage() {
       questions: filteredQuestions,
     });
     
-    const now = new Date();
     // Use fixed 2 hours from global start time, not from individual start
-    const globalEndTime = quizData.endTime;
     setStartTime(now);
     // End time is always 2 hours from global start, regardless of when user starts
     setEndTime(globalEndTime);
@@ -322,15 +344,12 @@ export default function RegistrationTestsPage() {
     }).catch(console.error);
   }, [quizData, teamInfo]);
 
+  // SECURITY: Score calculation removed - now done server-side only
+  // This function is kept for backward compatibility but should not be used
   const calculateScore = useCallback((answers: Answers, questions: Question[]): number => {
-    let correctCount = 0;
-    questions.forEach(question => {
-      const answer = answers[question.id];
-      if (answer && answer !== 'NO_ANSWER' && answer === question.correctOption) {
-        correctCount++;
-      }
-    });
-    return correctCount;
+    // Score is calculated server-side for security
+    // This function is deprecated
+    return 0;
   }, []);
 
   const handleQuizComplete = useCallback(() => {
@@ -339,65 +358,128 @@ export default function RegistrationTestsPage() {
   }, []);
 
   const handleSubmission = useCallback(async () => {
-    if (!quizData || !startTime || alreadySubmitted || !teamInfo.vehicleCategory) return;
+    // Validate required data before submission
+    if (!quizData) {
+      alert('Error: Quiz data is missing. Please refresh the page and try again.');
+      return;
+    }
+    if (!startTime) {
+      alert('Error: Start time is missing. Please refresh the page and try again.');
+      return;
+    }
+    if (alreadySubmitted) {
+      alert('You have already submitted this quiz.');
+      return;
+    }
+    
+    // Try to restore vehicleCategory from localStorage if missing
+    let currentTeamInfo = { ...teamInfo };
+    if (!currentTeamInfo.vehicleCategory) {
+      try {
+        const saved = localStorage.getItem('quiz_progress');
+        if (saved) {
+          const progress = JSON.parse(saved);
+          if (progress.teamInfo?.vehicleCategory) {
+            currentTeamInfo.vehicleCategory = progress.teamInfo.vehicleCategory;
+            setTeamInfo(currentTeamInfo);
+          }
+        }
+      } catch (error) {
+        console.error('Error restoring vehicleCategory:', error);
+      }
+    }
+    
+    if (!currentTeamInfo.vehicleCategory) {
+      alert('Error: Vehicle category is missing. Please refresh the page and try again.');
+      return;
+    }
+    if (!currentTeamInfo.preferredTeamNumber || !currentTeamInfo.alternativeTeamNumber) {
+      alert('Please fill in all required fields (Preferred Team Number and Alternative Team Number).');
+      return;
+    }
+    if (currentTeamInfo.vehicleCategory === 'CV' && !currentTeamInfo.fuelType) {
+      alert('Please select a fuel type for CV teams.');
+      return;
+    }
     
     // Filter questions to match what the team actually answered
     const filteredQuestions = quizData.questions.filter((q: any) => 
-      !q.category || q.category === 'common' || q.category === teamInfo.vehicleCategory
+      !q.category || q.category === 'common' || q.category === currentTeamInfo.vehicleCategory
     );
     
     const submitTime = new Date();
-    const timeDiff = Math.floor((submitTime.getTime() - startTime.getTime()) / 1000);
+    // Calculate time from global quiz start time (13:00 CET) to submission time for tie-breaker
+    const timeDiff = Math.floor((submitTime.getTime() - quizData.globalStartTime.getTime()) / 1000);
     setTimeTaken(timeDiff);
     
-    const finalScore = calculateScore(answers, filteredQuestions);
-    setScore(finalScore);
+    // SECURITY: Score is calculated server-side, not client-side
+    // Don't calculate or send score from client
 
     // Submit to API with retry logic for network issues
     const submitWithRetry = async (retries = 3): Promise<Response> => {
+      let lastError: Error | null = null;
+      let lastResponse: Response | null = null;
+      
       for (let attempt = 1; attempt <= retries; attempt++) {
-    try {
-      const response = await fetch('/api/quiz/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          teamName: teamInfo.name,
-          teamEmail: teamInfo.email,
-          vehicleCategory: teamInfo.vehicleCategory,
-          preferredTeamNumber: teamInfo.preferredTeamNumber,
-          alternativeTeamNumber: teamInfo.alternativeTeamNumber,
-          fuelType: teamInfo.fuelType,
-          answers,
-          timeTaken: timeDiff,
-          score: finalScore,
-          questions: filteredQuestions.map(q => ({
-            id: q.id,
-            text: q.text,
-            options: q.options,
-            correctOption: q.correctOption,
-          })),
-        }),
-      });
+        try {
+          const response = await fetch('/api/quiz/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              teamName: currentTeamInfo.name,
+              teamEmail: currentTeamInfo.email,
+              vehicleCategory: currentTeamInfo.vehicleCategory,
+              preferredTeamNumber: currentTeamInfo.preferredTeamNumber,
+              alternativeTeamNumber: currentTeamInfo.alternativeTeamNumber,
+              fuelType: currentTeamInfo.fuelType,
+              answers,
+              timeTaken: timeDiff,
+              // SECURITY: Score is calculated server-side, do not send from client
+              questions: filteredQuestions.map(q => ({
+                id: q.id,
+                text: q.text,
+                options: q.options,
+                // SECURITY: Do not send correctOption to server
+                category: q.category,
+              })),
+            }),
+          });
           
-          // If successful or client error (4xx), return immediately
-          if (response.ok || response.status < 500) {
+          // If successful, return immediately
+          if (response.ok) {
             return response;
           }
           
-          // For server errors (5xx), retry with exponential backoff
+          // For client errors (4xx), return immediately (don't retry)
+          if (response.status < 500) {
+            return response;
+          }
+          
+          // For server errors (5xx), save response and retry
+          lastResponse = response;
           if (attempt < retries) {
+            console.warn(`Submission attempt ${attempt} failed with status ${response.status}, retrying...`);
             await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
           }
         } catch (error) {
-          // Network errors - retry with exponential backoff
+          // Network errors - save error and retry
+          lastError = error instanceof Error ? error : new Error(String(error));
+          console.warn(`Submission attempt ${attempt} failed with network error:`, lastError.message);
           if (attempt < retries) {
             await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
-          } else {
-            throw error;
           }
         }
       }
-      throw new Error('Max retries exceeded');
+      
+      // All retries failed - provide detailed error message
+      if (lastResponse) {
+        const errorText = await lastResponse.text().catch(() => 'Unknown server error');
+        throw new Error(`Server error after ${retries} attempts: ${lastResponse.status} - ${errorText}`);
+      } else if (lastError) {
+        throw new Error(`Network error after ${retries} attempts: ${lastError.message}`);
+      } else {
+        throw new Error(`Submission failed after ${retries} attempts`);
+      }
     };
 
     try {
@@ -514,11 +596,12 @@ export default function RegistrationTestsPage() {
     }
   }, [answers, quizData, startTime, teamInfo, alreadySubmitted, calculateScore, handleQuizComplete]);
 
+  // FIX: Only trigger completion when time actually runs out (timeRemaining === 0)
   useEffect(() => {
-    if (quizStatus === QuizStatus.FINISHED && appState === 'active') {
+    if (quizStatus === QuizStatus.FINISHED && appState === 'active' && timeRemaining === 0) {
       handleQuizComplete();
     }
-  }, [quizStatus, appState, handleQuizComplete]);
+  }, [quizStatus, appState, timeRemaining, handleQuizComplete]);
 
   const renderContent = () => {
     if (appState === 'loading') {

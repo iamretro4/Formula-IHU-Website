@@ -1,15 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import ConditionalLayoutWrapper from "./conditional-layout-wrapper";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { generateStructuredData } from "@/lib/seo";
 import { Analytics } from "@vercel/analytics/next";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
+// Using system fonts to avoid build-time network dependency
+// Inter font will be loaded via CSS from Google Fonts at runtime
 
 export const metadata: Metadata = generateSEOMetadata({
   title: undefined, // Will use default title
@@ -45,6 +42,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://cdn.sanity.io" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet" />
         
         <script
           type="application/ld+json"
@@ -60,7 +58,8 @@ export default function RootLayout({
         />
       </head>
       <body 
-        className={`${inter.variable} font-sans antialiased bg-white text-gray-900`}
+        className="font-sans antialiased bg-white text-gray-900"
+        style={{ fontFamily: 'Inter, var(--font-sans)' }}
         suppressHydrationWarning
       >
         <ConditionalLayoutWrapper>{children}</ConditionalLayoutWrapper>

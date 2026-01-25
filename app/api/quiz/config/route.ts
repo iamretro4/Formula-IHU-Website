@@ -23,6 +23,7 @@ export async function GET() {
       scheduledStartTime,
       questions[] {
         text,
+        type,
         options,
         correctOption,
         category,
@@ -36,6 +37,15 @@ export async function GET() {
                 height
               }
             }
+          }
+        },
+        file {
+          asset-> {
+            _id,
+            url,
+            originalFilename,
+            size,
+            mimeType
           }
         }
       },
@@ -53,6 +63,7 @@ export async function GET() {
         scheduledStartTime,
         questions[] {
           text,
+          type,
           options,
           correctOption,
           category,
@@ -66,6 +77,15 @@ export async function GET() {
                   height
                 }
               }
+            }
+          },
+          file {
+            asset-> {
+              _id,
+              url,
+              originalFilename,
+              size,
+              mimeType
             }
           }
         },
@@ -92,16 +112,24 @@ export async function GET() {
     }
 
     // Transform questions to match expected format
+    // SECURITY: Do not send correctOption to client - score is calculated server-side
     const transformedQuestions = (quiz.questions || []).map((q: any, index: number) => ({
       id: index + 1,
       text: q.text,
+      type: q.type || 'multiple_choice', // Default to multiple_choice for backward compatibility
       options: q.options || [],
-      correctOption: q.correctOption,
+      // correctOption is NOT sent to client for security
       image: q.image?.asset?.url || null,
+      file: q.file?.asset ? {
+        url: q.file.asset.url,
+        filename: q.file.asset.originalFilename || 'download',
+        size: q.file.asset.size,
+        mimeType: q.file.asset.mimeType,
+      } : null,
       category: q.category || 'common',
     }));
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       id: quiz._id,
       title: quiz.title || 'Formula IHU Registration Quiz',
       scheduledStartTime: quiz.scheduledStartTime,
@@ -109,6 +137,11 @@ export async function GET() {
       questions: transformedQuestions,
       instructions: quiz.instructions || '',
     });
+
+    // Add caching headers for scalability (30 seconds cache, stale-while-revalidate for better UX)
+    response.headers.set('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60');
+    
+    return response;
   } catch {
     return NextResponse.json(
       { error: 'Failed to fetch quiz configuration' },

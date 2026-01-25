@@ -22,27 +22,72 @@ export default function TeamPortalPage() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                 />
               </svg>
             </div>
           </div>
           <h2 className="text-2xl font-semibold text-gray-900 mb-4 text-center">
-            Authentication Required
+            Formula IHU 2026: Registration Quiz Guidelines
           </h2>
-          <p className="text-gray-600 text-center mb-6">
-            Please log in to access the team portal. If you don&apos;t have an account, 
-            please contact us to register your team.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a 
-              href="https://hub.fihu.gr" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="px-6 py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors text-center"
-            >
-              Log In
-            </a>
+          
+          <div className="space-y-6 text-left max-w-3xl mx-auto">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">1. Registration Process</h3>
+              <p className="text-gray-700">
+                Teams do not need to pre-register for the Formula IHU registration quiz. According to the handbook, you simply need to access the site, input your team details (Name, Email, and Vehicle Category), and begin the test. The quiz page will appear automatically at 13:00 CET on fihu.gr. The interface is similar to a Google Form. As long as you have an active Formula Student Germany (FSG) 2026 account, you are eligible.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">2. Schedule & Access</h3>
+              <ul className="list-disc list-inside text-gray-700 space-y-1 ml-4">
+                <li><strong>Date:</strong> January 29, 2026</li>
+                <li><strong>Time:</strong> 13:00 CET (Duration: 2 Hours)</li>
+                <li><strong>Location:</strong> fihu.gr</li>
+                <li><strong>Note:</strong> The quiz will appear automatically at 13:00 CET. If it does not, you may reload the page. However, do not refresh the page once you have started the quiz.</li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">3. Required Information</h3>
+              <div className="space-y-3">
+                <div>
+                  <p className="font-medium text-gray-900 mb-1">When the quiz begins, you must input the following:</p>
+                  <ul className="list-disc list-inside text-gray-700 space-y-1 ml-4">
+                    <li><strong>Team Name:</strong> Official name as registered with your university.</li>
+                    <li><strong>Team Email:</strong> Valid email for official communication.</li>
+                    <li><strong>Vehicle Category:</strong> EV or CV.</li>
+                  </ul>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900 mb-1">When you submit the quiz, you must input the following:</p>
+                  <ul className="list-disc list-inside text-gray-700 space-y-1 ml-4">
+                    <li><strong>Team Numbers:</strong> Preferred and alternative choices (e.g., E88, C12).</li>
+                    <li><strong>Fuel Type:</strong> (CV Teams only) RON98 or E85.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">4. Scoring & Rules</h3>
+              <ul className="list-disc list-inside text-gray-700 space-y-1 ml-4">
+                <li><strong>Format:</strong> 10–20 Questions.</li>
+                <li><strong>Submission:</strong> Only the first submission recorded is accepted. No edits allowed.</li>
+                <li><strong>Scoring:</strong>
+                  <ul className="list-circle list-inside ml-6 mt-1 space-y-1">
+                    <li><strong>Correct:</strong> Full points.</li>
+                    <li><strong>Incorrect:</strong> -50% of the question&apos;s points deducted.</li>
+                    <li><strong>Unanswered:</strong> 0 points (no change).</li>
+                  </ul>
+                </li>
+                <li><strong>Tie-Breaker:</strong> In the event of a tie, the team with the faster submission time wins.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
             <a
               href="/contact"
               className="px-6 py-3 border-2 border-gray-900 text-gray-900 font-semibold rounded-lg hover:bg-gray-50 transition-colors text-center"

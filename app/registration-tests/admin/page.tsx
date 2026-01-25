@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Lock, BarChart3, Users, FileText, Settings, CheckCircle2, XCircle, Clock, X, Upload, Download } from 'lucide-react';
+import { Lock, BarChart3, Users, FileText, Settings, CheckCircle2, XCircle, Clock, X, Upload, Download, Network } from 'lucide-react';
 import Button from '@/components/ui/Button';
 
 interface QuizSubmission {
@@ -24,7 +24,9 @@ export default function QuizAdminPage() {
   const [submissions, setSubmissions] = useState<QuizSubmission[]>([]);
   const [quizConfig, setQuizConfig] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'results' | 'config'>('results');
+  const [activeTab, setActiveTab] = useState<'results' | 'config' | 'iplogs'>('results');
+  const [ipLogs, setIpLogs] = useState<any>(null);
+  const [loadingIpLogs, setLoadingIpLogs] = useState(false);
   const [selectedSubmission, setSelectedSubmission] = useState<QuizSubmission | null>(null);
   const [showAnswersModal, setShowAnswersModal] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -105,6 +107,25 @@ export default function QuizAdminPage() {
     } catch (error) {
       console.error('Error fetching latest quiz:', error);
       setQuizConfig({ questions: [], title: 'No Quiz Found' });
+    }
+  };
+
+  const fetchIpLogs = async () => {
+    setLoadingIpLogs(true);
+    try {
+      const response = await fetch('/api/quiz/ip-logs');
+      if (response.ok) {
+        const data = await response.json();
+        setIpLogs(data);
+      } else {
+        console.error('Failed to fetch IP logs');
+        setIpLogs(null);
+      }
+    } catch (error) {
+      console.error('Error fetching IP logs:', error);
+      setIpLogs(null);
+    } finally {
+      setLoadingIpLogs(false);
     }
   };
 
@@ -195,7 +216,7 @@ export default function QuizAdminPage() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `quiz-results-${new Date().toISOString().split('T')[0]}.csv`;
+      a.download = 'FIHU Quiz RE Score.csv';
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -309,6 +330,22 @@ export default function QuizAdminPage() {
             >
               <Settings className="inline h-5 w-5 mr-2" />
               Quiz Configuration
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab('iplogs');
+                if (!ipLogs && !loadingIpLogs) {
+                  fetchIpLogs();
+                }
+              }}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'iplogs'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <Network className="inline h-5 w-5 mr-2" />
+              IP Logs & Verification
             </button>
           </nav>
         </div>
@@ -622,6 +659,121 @@ export default function QuizAdminPage() {
                 </div>
               </div>
             )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'iplogs' && (
+          <div className="space-y-6">
+            <div className="bg-white shadow rounded-lg p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">IP Address Logs</h2>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Review IP addresses for verification. IPs are logged for all quiz submissions.
+                  </p>
+                </div>
+                <button
+                  onClick={fetchIpLogs}
+                  disabled={loadingIpLogs}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loadingIpLogs ? 'Loading...' : 'Refresh'}
+                </button>
+              </div>
+
+              {loadingIpLogs ? (
+                <div className="text-center py-8">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <p className="mt-2 text-gray-600">Loading IP logs...</p>
+                </div>
+              ) : ipLogs ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-3 gap-4 mb-6">
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <p className="text-sm font-medium text-blue-600">Total Submissions</p>
+                      <p className="text-2xl font-bold text-blue-900">{ipLogs.total || 0}</p>
+                    </div>
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <p className="text-sm font-medium text-green-600">Unique IPs</p>
+                      <p className="text-2xl font-bold text-green-900">{ipLogs.uniqueIPs || 0}</p>
+                    </div>
+                    <div className="bg-yellow-50 p-4 rounded-lg">
+                      <p className="text-sm font-medium text-yellow-600">Suspicious IPs</p>
+                      <p className="text-2xl font-bold text-yellow-900">
+                        {ipLogs.ipStats?.filter((stat: any) => stat.count > 1).length || 0}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            IP Address
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Submissions
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Teams
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {ipLogs.ipStats?.map((stat: any, index: number) => (
+                          <tr key={index} className={stat.count > 1 ? 'bg-yellow-50' : ''}>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900">{stat.ip}</div>
+                              {stat.count > 1 && (
+                                <div className="text-xs text-yellow-600 font-semibold">⚠️ Multiple submissions</div>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                stat.count > 1 ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
+                              }`}>
+                                {stat.count}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="text-sm text-gray-900 space-y-1">
+                                {stat.teams.map((team: any, teamIndex: number) => (
+                                  <div key={teamIndex} className="flex items-center justify-between">
+                                    <span className="font-medium">{team.teamName}</span>
+                                    <span className="text-xs text-gray-500 ml-2">
+                                      {new Date(team.submittedAt).toLocaleString()}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {stat.count > 1 && (
+                                <span className="text-yellow-600 font-medium">Review needed</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {ipLogs.ipStats?.length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      No IP logs found.
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  Click "Refresh" to load IP logs.
+                </div>
+              )}
             </div>
           </div>
         )}

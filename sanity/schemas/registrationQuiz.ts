@@ -42,18 +42,53 @@ export default defineType({
               validation: (Rule: any) => Rule.required(),
             },
             {
+              name: 'type',
+              title: 'Question Type',
+              type: 'string',
+              description: 'Multiple choice or open text question',
+              options: {
+                list: [
+                  { title: 'Multiple Choice', value: 'multiple_choice' },
+                  { title: 'Open Text', value: 'open_text' },
+                ],
+              },
+              initialValue: 'multiple_choice',
+              validation: (Rule: any) => Rule.required(),
+            },
+            {
               name: 'options',
               title: 'Answer Options',
               type: 'array',
               of: [{ type: 'string' }],
-              validation: (Rule: any) => Rule.required().min(2).max(6),
+              description: 'Required for multiple choice questions',
+              hidden: ({ parent }: any) => parent?.type === 'open_text',
+              validation: (Rule: any) => 
+                Rule.custom((options: string[] | undefined, context: any) => {
+                  const questionType = context.parent?.type;
+                  if (questionType === 'multiple_choice') {
+                    if (!options || options.length < 2) {
+                      return 'Multiple choice questions require at least 2 options';
+                    }
+                    if (options.length > 6) {
+                      return 'Multiple choice questions can have at most 6 options';
+                    }
+                  }
+                  return true;
+                }),
             },
             {
               name: 'correctOption',
               title: 'Correct Answer',
               type: 'string',
-              description: 'Must match one of the options exactly',
-              validation: (Rule: any) => Rule.required(),
+              description: 'For multiple choice: must match one of the options exactly. For open text: optional reference answer (not used for auto-scoring)',
+              hidden: ({ parent }: any) => parent?.type === 'open_text',
+              validation: (Rule: any) => 
+                Rule.custom((correctOption: string | undefined, context: any) => {
+                  const questionType = context.parent?.type;
+                  // For multiple choice, correctOption is optional (can be left empty for questions without a correct answer)
+                  // For open text, correctOption is not shown/used
+                  return true;
+                }),
             },
             {
               name: 'image',
@@ -62,6 +97,15 @@ export default defineType({
               description: 'Optional image to display with the question',
               options: {
                 hotspot: true,
+              },
+            },
+            {
+              name: 'file',
+              title: 'Question File',
+              type: 'file',
+              description: 'Optional file to download (PDF, DOC, etc.)',
+              options: {
+                accept: '.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip',
               },
             },
             {
@@ -82,6 +126,13 @@ export default defineType({
           preview: {
             select: {
               title: 'text',
+              type: 'type',
+            },
+            prepare({ title, type }: any) {
+              return {
+                title: title || 'Untitled Question',
+                subtitle: type === 'open_text' ? 'Open Text' : 'Multiple Choice',
+              };
             },
           },
         },
