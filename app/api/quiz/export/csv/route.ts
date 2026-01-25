@@ -180,7 +180,7 @@ export async function GET(request: NextRequest) {
       });
       
       const row: string[] = [
-        calculatedTotalScore, // Use recalculated score to match per-question scores
+        String(calculatedTotalScore), // Use recalculated score to match per-question scores
         timestamp,
         submission.team_name || '',
         '', // University Name - not stored, leave empty
@@ -197,7 +197,9 @@ export async function GET(request: NextRequest) {
           return;
         }
         
-        row.push(questionScores[index]);
+        // Convert to string - can be number (score) or string (text answer)
+        const scoreValue = questionScores[index];
+        row.push(typeof scoreValue === 'number' ? String(scoreValue) : (scoreValue || ''));
       });
       
       csvRows.push(row.map(escapeCsv).join(','));
