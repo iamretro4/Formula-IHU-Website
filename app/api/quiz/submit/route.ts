@@ -72,8 +72,8 @@ export async function POST(request: NextRequest) {
       if (cfConnectingIP) {
         return cfConnectingIP;
       }
-      // Fallback to connection remote address
-      return request.ip || 'unknown';
+      // Fallback if no IP headers found
+      return 'unknown';
     };
 
     const clientIP = getClientIP(request);
