@@ -86,8 +86,11 @@ The quiz system is designed to handle **200+ concurrent users** with the followi
 
 #### 4. File Downloads
 - **Current**: Files served via Sanity CDN
-- **Mitigation**: CDN handles high traffic automatically
-- **Note**: Large files (>10MB) may need optimization
+- **Optimization Implemented**:
+  - ✅ **Streaming for Large Files**: Files >10MB stream directly from CDN (no memory issues)
+  - ✅ **CDN Caching**: Immutable cache headers for efficient CDN caching
+  - ✅ **Accept-Ranges**: Supports partial downloads for large files
+- **Result**: CDN handles all traffic, no server memory issues even with large files
 
 ## Monitoring Recommendations
 
