@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { client } from '@/lib/sanity';
 import { groq } from 'next-sanity';
+import { getCachedQuiz, setCachedQuiz, shouldRefreshCache } from '@/lib/quiz-cache';
 
 export const revalidate = 30; // Revalidate every 30 seconds (optimized)
 
@@ -13,6 +14,18 @@ export async function GET() {
         { error: 'Sanity client not configured' },
         { status: 500 }
       );
+    }
+
+    // Check shared cache first to prevent duplicate API calls
+    const cachedData = getCachedQuiz(30000); // 30 second cache
+    if (cachedData) {
+      // Check if we should refresh cache (near quiz start time)
+      if (cachedData.scheduledStartTime && !shouldRefreshCache(cachedData.scheduledStartTime)) {
+        const cachedResponse = NextResponse.json(cachedData);
+        cachedResponse.headers.set('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60');
+        cachedResponse.headers.set('X-Cache', 'HIT');
+        return cachedResponse;
+      }
     }
 
     // First try to get an active quiz
@@ -111,35 +124,54 @@ export async function GET() {
       );
     }
 
-    // Transform questions to match expected format
-    // SECURITY: Do not send correctOption to client - score is calculated server-side
-    const transformedQuestions = (quiz.questions || []).map((q: any, index: number) => ({
-      id: index + 1,
-      text: q.text,
-      type: q.type || 'multiple_choice', // Default to multiple_choice for backward compatibility
-      options: q.options || [],
-      // correctOption is NOT sent to client for security
-      image: q.image?.asset?.url || null,
-      file: q.file?.asset ? {
-        url: q.file.asset.url,
-        filename: q.file.asset.originalFilename || 'download',
-        size: q.file.asset.size,
-        mimeType: q.file.asset.mimeType,
-      } : null,
-      category: q.category || 'common',
-    }));
-
-    const response = NextResponse.json({
+    // Store full quiz data in cache (including correctOption for server-side scoring)
+    const fullQuizData = {
       id: quiz._id,
       title: quiz.title || 'Formula IHU Registration Quiz',
       scheduledStartTime: quiz.scheduledStartTime,
-      durationMinutes: 120, // Fixed 2 hours (120 minutes) - kept for backward compatibility
-      questions: transformedQuestions,
+      durationMinutes: 120,
+      questions: (quiz.questions || []).map((q: any, index: number) => ({
+        id: index + 1,
+        text: q.text,
+        type: q.type || 'multiple_choice',
+        options: q.options || [],
+        correctOption: q.correctOption, // Include for server-side scoring
+        image: q.image?.asset?.url || null,
+        file: q.file?.asset ? {
+          url: q.file.asset.url,
+          filename: q.file.asset.originalFilename || 'download',
+          size: q.file.asset.size,
+          mimeType: q.file.asset.mimeType,
+        } : null,
+        category: q.category || 'common',
+      })),
       instructions: quiz.instructions || '',
+    };
+
+    // Transform questions for client (remove correctOption for security)
+    const transformedQuestions = fullQuizData.questions.map((q: any) => {
+      const { correctOption, ...questionWithoutAnswer } = q;
+      return questionWithoutAnswer;
     });
+
+    // Response data for client (without correctOption)
+    const responseData = {
+      id: fullQuizData.id,
+      title: fullQuizData.title,
+      scheduledStartTime: fullQuizData.scheduledStartTime,
+      durationMinutes: fullQuizData.durationMinutes,
+      questions: transformedQuestions, // No correctOption sent to client
+      instructions: fullQuizData.instructions,
+    };
+
+    // Update shared cache with full data (includes correctOption for server-side use)
+    setCachedQuiz(fullQuizData, quiz._id);
+
+    const response = NextResponse.json(responseData);
 
     // Add caching headers for scalability (30 seconds cache, stale-while-revalidate for better UX)
     response.headers.set('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60');
+    response.headers.set('X-Cache', 'MISS');
     
     return response;
   } catch {

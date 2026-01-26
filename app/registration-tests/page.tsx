@@ -36,27 +36,68 @@ export default function RegistrationTestsPage() {
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
-        const response = await fetch('/api/quiz/config');
-        
-        if (!response.ok) {
-          if (response.status === 404) {
-            // No active quiz configured
-            setAppState('ready');
-            setQuizData({
-              id: 'no-quiz',
-              title: 'No Quiz Available',
-              globalStartTime: new Date(),
-              endTime: new Date(),
-              questions: [],
-            });
-            return;
-          }
-          throw new Error(`Failed to fetch quiz configuration: ${response.status}`);
-        }
-        
-        const data = await response.json();
+        // Check localStorage cache first (reduces API calls on page refresh)
+        const cachedDataStr = localStorage.getItem('quiz-config');
+        const cacheTimeStr = localStorage.getItem('quiz-config-time');
+        let data: any = null;
+        let useCache = false;
 
-        if (data.error) {
+        if (cachedDataStr && cacheTimeStr) {
+          const cacheTime = parseInt(cacheTimeStr, 10);
+          const cacheAge = Date.now() - cacheTime;
+          const cachedData = JSON.parse(cachedDataStr);
+
+          // Use cache if:
+          // 1. Cache is less than 1 minute old
+          // 2. We're not within 2 minutes of quiz start time
+          if (cachedData.scheduledStartTime) {
+            const scheduledStart = new Date(cachedData.scheduledStartTime);
+            const now = new Date();
+            const timeUntilStart = scheduledStart.getTime() - now.getTime();
+            const isNearStart = timeUntilStart > 0 && timeUntilStart < 2 * 60 * 1000; // 2 minutes
+
+            if (cacheAge < 60000 && !isNearStart) {
+              // Use cached data
+              data = cachedData;
+              useCache = true;
+            }
+          } else if (cacheAge < 60000) {
+            // Use cache if no scheduled time (quiz not configured)
+            data = cachedData;
+            useCache = true;
+          }
+        }
+
+        // Fetch fresh data if cache not available or invalid
+        if (!useCache) {
+          const response = await fetch('/api/quiz/config');
+          
+          if (!response.ok) {
+            if (response.status === 404) {
+              // No active quiz configured
+              setAppState('ready');
+              setQuizData({
+                id: 'no-quiz',
+                title: 'No Quiz Available',
+                globalStartTime: new Date(),
+                endTime: new Date(),
+                questions: [],
+              });
+              return;
+            }
+            throw new Error(`Failed to fetch quiz configuration: ${response.status}`);
+          }
+          
+          data = await response.json();
+
+          // Update localStorage cache
+          if (data && !data.error) {
+            localStorage.setItem('quiz-config', JSON.stringify(data));
+            localStorage.setItem('quiz-config-time', Date.now().toString());
+          }
+        }
+
+        if (data?.error) {
           console.error('Quiz config error:', data.error);
           setAppState('ready');
           return;

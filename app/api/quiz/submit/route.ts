@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { client } from '@/lib/sanity';
 import { groq } from 'next-sanity';
+import { getCachedQuiz } from '@/lib/quiz-cache';
 
 // Check if team submitted
 export async function GET(request: NextRequest) {
@@ -104,22 +105,40 @@ export async function POST(request: NextRequest) {
     // Never trust client-calculated score
     let calculatedScore = 0;
     try {
-      // Add timeout to Sanity fetch to prevent hanging
-      const quizPromise = client.fetch(groq`*[_type == "registrationQuiz" && isActive == true][0] {
-        questions[] {
-          text,
-          type,
-          options,
-          correctOption,
-          category
-        }
-      }`);
+      // Try to use cached quiz data first (reduces API calls)
+      // Cache is safe because questions don't change during active quiz period
+      let quiz: any = null;
+      const cachedQuiz = getCachedQuiz(60000); // 60 second cache for scoring
       
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Sanity fetch timeout')), 10000)
-      );
-      
-      const quiz = await Promise.race([quizPromise, timeoutPromise]).catch(() => null) as any;
+      if (cachedQuiz && cachedQuiz.questions) {
+        // Use cached quiz data - safe because questions are set before quiz activation
+        quiz = {
+          questions: cachedQuiz.questions.map((q: any) => ({
+            text: q.text,
+            type: q.type,
+            options: q.options,
+            correctOption: q.correctOption, // Needed for scoring
+            category: q.category,
+          })),
+        };
+      } else {
+        // Fallback to fresh fetch if cache unavailable
+        const quizPromise = client.fetch(groq`*[_type == "registrationQuiz" && isActive == true][0] {
+          questions[] {
+            text,
+            type,
+            options,
+            correctOption,
+            category
+          }
+        }`);
+        
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Sanity fetch timeout')), 10000)
+        );
+        
+        quiz = await Promise.race([quizPromise, timeoutPromise]).catch(() => null) as any;
+      }
 
       if (quiz && quiz.questions && Array.isArray(quiz.questions) && quiz.questions.length > 0) {
         // Filter questions based on vehicle category

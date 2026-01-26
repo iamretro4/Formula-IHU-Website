@@ -36,9 +36,30 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get the file content
-    const fileBuffer = await response.arrayBuffer();
     const contentType = response.headers.get('content-type') || 'application/pdf';
+    const contentLength = response.headers.get('content-length');
+    const fileSize = contentLength ? parseInt(contentLength, 10) : 0;
+
+    // For large files (>10MB), stream directly from Sanity CDN to client
+    // This prevents memory issues and improves performance
+    const LARGE_FILE_THRESHOLD = 10 * 1024 * 1024; // 10MB
+
+    if (fileSize > LARGE_FILE_THRESHOLD) {
+      // Stream large files directly from Sanity CDN to client
+      // This avoids loading the entire file into memory
+      return new NextResponse(response.body, {
+        headers: {
+          'Content-Type': contentType,
+          'Content-Disposition': `attachment; filename="${filename}"`,
+          'Content-Length': contentLength || '',
+          'Cache-Control': 'public, max-age=3600, immutable',
+          'Accept-Ranges': 'bytes',
+        },
+      });
+    }
+
+    // For smaller files, load into memory (faster for small files)
+    const fileBuffer = await response.arrayBuffer();
 
     // Return the file with proper headers for download
     return new NextResponse(fileBuffer, {
@@ -46,7 +67,7 @@ export async function GET(request: NextRequest) {
         'Content-Type': contentType,
         'Content-Disposition': `attachment; filename="${filename}"`,
         'Content-Length': fileBuffer.byteLength.toString(),
-        'Cache-Control': 'public, max-age=3600',
+        'Cache-Control': 'public, max-age=3600, immutable',
       },
     });
   } catch (error) {

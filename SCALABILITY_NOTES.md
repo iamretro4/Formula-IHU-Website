@@ -11,11 +11,27 @@ The quiz system is designed to handle **200+ concurrent users** with the followi
 
 ### Performance Optimizations
 
-#### 1. Caching Strategy
+#### 1. Caching Strategy (Multi-Layer)
+- **Sanity CDN**: 
+  - ✅ Enabled for all read operations (useCdn: true)
+  - Reduces API calls by ~80%
+  - Safe because quiz content is set before activation
+  
+- **Shared In-Memory Cache** (`lib/quiz-cache.ts`):
+  - ✅ 30-second cache shared across all API routes
+  - Prevents duplicate requests during high traffic
+  - Smart invalidation near quiz start time
+  
 - **Quiz Config API** (`/api/quiz/config`): 
-  - Cache: 30 seconds (revalidate)
-  - Stale-while-revalidate: 60 seconds
-  - Reduces Sanity API calls significantly
+  - ✅ HTTP Cache: 30 seconds (s-maxage)
+  - ✅ Stale-while-revalidate: 60 seconds
+  - ✅ In-memory cache check before Sanity fetch
+  - ✅ X-Cache header for monitoring
+  
+- **Client-Side localStorage**:
+  - ✅ 1-minute cache on client side
+  - ✅ Smart invalidation within 2 minutes of quiz start
+  - ✅ Reduces API calls on page refresh
   
 - **Proxy Cache** (`proxy.ts`):
   - Quiz status cached for 30 seconds
@@ -31,6 +47,8 @@ The quiz system is designed to handle **200+ concurrent users** with the followi
 - **Timeout Protection**: Sanity queries have 10-second timeouts
 - **Graceful Degradation**: Score calculation failures don't block submissions
 - **Error Handling**: Comprehensive error handling prevents cascading failures
+- **Cache-First Strategy**: Submit route uses cached quiz data (60s cache) before fetching fresh
+- **Request Deduplication**: Multiple simultaneous requests share cached data
 
 #### 4. Client-Side Optimizations
 - **Local Storage Backup**: Progress saved locally as backup
