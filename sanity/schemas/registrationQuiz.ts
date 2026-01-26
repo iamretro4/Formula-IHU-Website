@@ -110,9 +110,9 @@ export default defineType({
               name: 'file',
               title: 'Question File',
               type: 'file',
-              description: 'Optional file to download (PDF, DOC, etc.)',
+              description: 'Optional file to download (PDF, DOC, PNG, etc.)',
               options: {
-                accept: '.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip',
+                accept: '.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.png',
               },
             },
             {
