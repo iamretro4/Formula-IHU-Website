@@ -85,6 +85,16 @@ export default function TeamPortalPage() {
                 <li><strong>Tie-Breaker:</strong> In the event of a tie, the team with the faster submission time wins.</li>
               </ul>
             </div>
+
+            <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-6 mt-6">
+              <h3 className="text-lg font-semibold text-yellow-900 mb-3">⚠️ Important Update: Protest Deadline</h3>
+              <p className="text-yellow-800 mb-2">
+                <strong>The deadline for submitting protests is 29 January 2026 at 22:00 CET.</strong>
+              </p>
+              <p className="text-yellow-800">
+                All protests must be submitted via email to <a href="mailto:technical.formulaihu@ihu.gr" className="underline font-semibold">technical.formulaihu@ihu.gr</a>
+              </p>
+            </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">

@@ -21,6 +21,7 @@ const EXCLUDED_PATHS = [
 // Cache for quiz status to avoid hitting Sanity on every request
 let quizStatusCache: {
   isActive: boolean;
+  testMode: boolean;
   timestamp: number;
 } | null = null;
 
@@ -61,6 +62,7 @@ export async function proxy(request: NextRequest) {
       const query = groq`*[_type == "registrationQuiz" && isActive == true][0] {
         _id,
         isActive,
+        testMode,
         scheduledStartTime
       }`;
 
@@ -84,12 +86,13 @@ export async function proxy(request: NextRequest) {
       // Update cache
       quizStatusCache = {
         isActive: isQuizActive,
+        testMode: quiz?.testMode || false,
         timestamp: now,
       };
     }
 
-    // If quiz is active, redirect to registration-tests
-    if (isQuizActive) {
+    // If quiz is active and NOT in test mode, redirect to registration-tests
+    if (isQuizActive && !quizStatusCache?.testMode) {
       const redirectUrl = new URL('/registration-tests', request.url);
       // Preserve query parameters if any
       redirectUrl.search = request.nextUrl.search;

@@ -20,6 +20,13 @@ export default defineType({
       initialValue: false,
     }),
     defineField({
+      name: 'testMode',
+      title: 'Test Mode',
+      type: 'boolean',
+      description: 'When enabled, the quiz can be active but the public site will NOT redirect. Use this to test the quiz without closing the public site.',
+      initialValue: false,
+    }),
+    defineField({
       name: 'scheduledStartTime',
       title: 'Scheduled Start Date & Time',
       type: 'datetime',
