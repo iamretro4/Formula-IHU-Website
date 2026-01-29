@@ -16,21 +16,12 @@ const calculateTime = (targetDate: string) => {
   }
 
   const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-
-  return { days, hours, minutes, seconds };
+  return { days };
 };
 
 export default function CountdownTimer({ targetDate, eventTitle }: CountdownTimerProps) {
   // Start with null to ensure server and client render the same initial state
-  const [timeLeft, setTimeLeft] = useState<{
-    days: number;
-    hours: number;
-    minutes: number;
-    seconds: number;
-  } | null>(null);
+  const [timeLeft, setTimeLeft] = useState<{ days: number } | null>(null);
   const [isExpired, setIsExpired] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -48,12 +39,9 @@ export default function CountdownTimer({ targetDate, eventTitle }: CountdownTime
       }
     };
 
-    // Calculate immediately on mount
+    // Calculate immediately on mount, then once per minute (days only)
     updateTime();
-
-    // Then update every second
-    const timer = setInterval(updateTime, 1000);
-
+    const timer = setInterval(updateTime, 60 * 1000);
     return () => clearInterval(timer);
   }, [targetDate]);
 
@@ -64,16 +52,15 @@ export default function CountdownTimer({ targetDate, eventTitle }: CountdownTime
         <div className="absolute inset-0 bg-gradient-to-br from-[#1F45FC] via-[#4A6BFD] to-[#1A3AE0]"></div>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.15),transparent_70%)]"></div>
         <div className="relative z-10 px-8 py-6 md:px-12 md:py-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="text-center">
-                <div className="relative bg-white/15 backdrop-blur-lg border-2 border-white/30 rounded-xl px-4 py-6 md:px-6 md:py-8 shadow-xl">
-                  <div className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 tracking-tight drop-shadow-lg">
-                    --
-                  </div>
-                </div>
+          <div className="flex justify-center">
+            <div className="relative bg-white/15 backdrop-blur-lg border-2 border-white/30 rounded-xl px-8 py-6 md:px-12 md:py-8 shadow-xl">
+              <div className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 tracking-tight drop-shadow-lg">
+                --
               </div>
-            ))}
+              <div className="text-xs md:text-sm font-semibold text-white/90 uppercase tracking-widest">
+                Days
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -109,52 +96,15 @@ export default function CountdownTimer({ targetDate, eventTitle }: CountdownTime
           </div>
         )}
         
-        {/* Countdown display */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {/* Days */}
+        {/* Countdown display - days only */}
+        <div className="flex justify-center">
           <div className="text-center">
-            <div className="relative bg-white/15 backdrop-blur-lg border-2 border-white/30 rounded-xl px-4 py-6 md:px-6 md:py-8 shadow-xl">
+            <div className="relative bg-white/15 backdrop-blur-lg border-2 border-white/30 rounded-xl px-8 py-6 md:px-12 md:py-8 shadow-xl">
               <div className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 tracking-tight drop-shadow-lg">
-                {timeLeft.days.toString().padStart(2, '0')}
+                {timeLeft.days}
               </div>
               <div className="text-xs md:text-sm font-semibold text-white/90 uppercase tracking-widest">
                 Days
-              </div>
-            </div>
-          </div>
-          
-          {/* Hours */}
-          <div className="text-center">
-            <div className="relative bg-white/15 backdrop-blur-lg border-2 border-white/30 rounded-xl px-4 py-6 md:px-6 md:py-8 shadow-xl">
-              <div className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 tracking-tight drop-shadow-lg">
-                {timeLeft.hours.toString().padStart(2, '0')}
-              </div>
-              <div className="text-xs md:text-sm font-semibold text-white/90 uppercase tracking-widest">
-                Hours
-              </div>
-            </div>
-          </div>
-          
-          {/* Minutes */}
-          <div className="text-center">
-            <div className="relative bg-white/15 backdrop-blur-lg border-2 border-white/30 rounded-xl px-4 py-6 md:px-6 md:py-8 shadow-xl">
-              <div className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 tracking-tight drop-shadow-lg">
-                {timeLeft.minutes.toString().padStart(2, '0')}
-              </div>
-              <div className="text-xs md:text-sm font-semibold text-white/90 uppercase tracking-widest">
-                Minutes
-              </div>
-            </div>
-          </div>
-          
-          {/* Seconds */}
-          <div className="text-center">
-            <div className="relative bg-white/15 backdrop-blur-lg border-2 border-white/30 rounded-xl px-4 py-6 md:px-6 md:py-8 shadow-xl">
-              <div className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 tracking-tight drop-shadow-lg">
-                {timeLeft.seconds.toString().padStart(2, '0')}
-              </div>
-              <div className="text-xs md:text-sm font-semibold text-white/90 uppercase tracking-widest">
-                Seconds
               </div>
             </div>
           </div>

@@ -63,12 +63,15 @@ export default async function Hero() {
                 </p>
                 <p className="text-base md:text-lg text-gray-300 mb-6">{featuredEvent.location}</p>
                 
-                {/* Registration Quiz Countdown - until 29-01-2026 at 13:00 CET */}
-                  <div className="mt-6">
-                    <CountdownTimer 
-                    targetDate="2026-01-29T12:00:00.000Z" 
-                    eventTitle="Registration Quiz starts in"
-                    />
+                {/* Countdown to competition */}
+                  {featuredEvent.startDate && (
+                    <div className="mt-6">
+                      <CountdownTimer
+                        targetDate={featuredEvent.startDate.includes('T') ? featuredEvent.startDate : `${featuredEvent.startDate}T00:00:00.000Z`}
+                        eventTitle="Competition starts in"
+                      />
+                    </div>
+                  )}
                     <div className="mt-4 flex justify-center">
                       <Link
                         href="/events/2026"
@@ -78,7 +81,6 @@ export default async function Hero() {
                         <ArrowRight className="w-4 h-4" />
                       </Link>
                     </div>
-                  </div>
               </div>
             </div>
           )}
