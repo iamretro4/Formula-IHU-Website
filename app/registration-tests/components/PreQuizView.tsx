@@ -20,6 +20,11 @@ const PreQuizView: React.FC<PreQuizViewProps> = ({ teamInfo, setTeamInfo, onStar
   
   return (
     <div className="max-w-2xl mx-auto">
+      <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4 mb-6">
+        <p className="text-sm font-semibold text-red-900 text-center">
+          ⚠️ Please refresh the page at 13:00 CET to access the quiz
+        </p>
+      </div>
       <div className="bg-white p-8 rounded-xl shadow-md space-y-6">
         <div className="text-center">
             <h2 className="text-3xl font-bold text-gray-900">Quiz Registration</h2>
@@ -77,15 +82,60 @@ const PreQuizView: React.FC<PreQuizViewProps> = ({ teamInfo, setTeamInfo, onStar
           </div>
         </form>
 
-        <div className="flex items-start bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+        <div className="flex items-start bg-yellow-50 p-5 rounded-lg border border-yellow-200">
             <Icon name="warning" className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
-            <div className="ml-3">
-                <p className="text-sm text-yellow-800 font-medium">Important:</p>
-                <ul className="list-disc list-inside text-sm text-yellow-700 mt-1 space-y-1">
-                    <li>Do not refresh the page once the quiz begins.</li>
-                    <li>Ensure you have a stable internet connection.</li>
-                    <li>Your submission time is recorded on the server.</li>
-                </ul>
+            <div className="ml-3 flex-1">
+                <p className="text-sm text-yellow-800 font-semibold mb-3">Important Information:</p>
+                <div className="space-y-3 text-sm text-yellow-700">
+                    <div>
+                        <p className="font-semibold text-yellow-800 mb-1.5">RULES:</p>
+                        <ul className="list-disc list-inside ml-2 space-y-1">
+                            <li>Read all questions carefully</li>
+                            <li>One attempt only</li>
+                            <li>Progress saves automatically</li>
+                            <li>Quiz ends after you submit your answers AND select your preferred vehicle number</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <p className="font-semibold text-yellow-800 mb-1.5">SCORING:</p>
+                        <ul className="list-disc list-inside ml-2 space-y-1">
+                            <li>Correct Answer = full points</li>
+                            <li>Incorrect Answer = half of the question&apos;s points deducted</li>
+                            <li>Blank Answer / &quot;Not Answer&quot; = no impact on your score</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <p className="font-semibold text-yellow-800 mb-1.5">OPEN-ENDED:</p>
+                        <p className="ml-2">If you don&apos;t wish to answer, enter a space or &quot;-&quot;.</p>
+                    </div>
+                    <div className="pt-2 border-t border-yellow-300 mt-3">
+                        <ul className="list-disc list-inside space-y-1.5">
+                            <li>Do not refresh the page once the quiz begins.</li>
+                            <li>Ensure you have a stable internet connection.</li>
+                            <li>Your submission time is recorded on the server.</li>
+                            <li>
+                                Keep these documents handy (you may need them):{' '}
+                                <a 
+                                    href="https://www.fihu.gr/api/download?url=https%3A%2F%2Fcdn.sanity.io%2Ffiles%2F4xb55exq%2Fproduction%2F59b62a2fb46b5ab7d5ece6274f5f6ee784740463.pdf&filename=Formula%20IHU%202026%20Competition%20Handbook%20v1.0.pdf"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="underline hover:text-yellow-900 font-medium"
+                                >
+                                    Handbook
+                                </a>
+                                {', '}
+                                <a 
+                                    href="https://www.fihu.gr/api/download?url=https%3A%2F%2Fcdn.sanity.io%2Ffiles%2F4xb55exq%2Fproduction%2Fcb09ad78fafcbde16cc2c26bfd0eccaf143efe2d.pdf&filename=FORMULA%20IHU%202026%20Rules%20%26%20Grey%20Areas%20Clarifications.pdf"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="underline hover:text-yellow-900 font-medium"
+                                >
+                                    Grey Areas &amp; Clarifications
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
 

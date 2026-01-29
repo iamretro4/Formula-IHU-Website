@@ -103,7 +103,7 @@ const QuizView: React.FC<QuizViewProps> = ({ questions, answers, setAnswers, onS
                   rows={4}
                 />
                 {answers[q.id] === 'NO_ANSWER' || !answers[q.id] ? (
-                  <p className="text-sm text-gray-500 italic">Leave empty if you don't want to answer</p>
+                  <p className="text-sm text-gray-500 italic">If you don&apos;t wish to answer, enter a space or &quot;-&quot; .</p>
                 ) : null}
               </div>
             ) : (
