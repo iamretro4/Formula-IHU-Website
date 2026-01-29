@@ -5,7 +5,6 @@ import { groq } from 'next-sanity';
 
 // Paths that should never be redirected
 const EXCLUDED_PATHS = [
-  '/registration-tests',
   '/api',
   '/studio',
   '/_next',
@@ -98,14 +97,16 @@ export async function proxy(request: NextRequest) {
     if (isQuizActive && !quizStatusCache?.testMode) {
       // Check if Google Forms redirect is enabled
       if (quizStatusCache?.redirectToGoogleForms) {
-        // Redirect to Google Forms
+        // Redirect to Google Forms (for all paths including /registration-tests)
         return NextResponse.redirect('https://forms.gle/f4QXcT2t2Csm9ooGA');
       } else {
-        // Redirect to built-in quiz system
-        const redirectUrl = new URL('/registration-tests', request.url);
-        // Preserve query parameters if any
-        redirectUrl.search = request.nextUrl.search;
-        return NextResponse.redirect(redirectUrl);
+        // Only redirect to /registration-tests if not already there
+        if (pathname !== '/registration-tests') {
+          const redirectUrl = new URL('/registration-tests', request.url);
+          // Preserve query parameters if any
+          redirectUrl.search = request.nextUrl.search;
+          return NextResponse.redirect(redirectUrl);
+        }
       }
     }
   } catch (error) {
