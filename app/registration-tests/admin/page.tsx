@@ -33,6 +33,8 @@ export default function QuizAdminPage() {
   const [importError, setImportError] = useState('');
   const [importSuccess, setImportSuccess] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [redirectToGoogleForms, setRedirectToGoogleForms] = useState(false);
+  const [togglingRedirect, setTogglingRedirect] = useState(false);
 
   useEffect(() => {
     // Check admin authentication
@@ -77,6 +79,7 @@ export default function QuizAdminPage() {
           await fetchLatestQuiz();
         } else {
           setQuizConfig(config);
+          setRedirectToGoogleForms(config.redirectToGoogleForms || false);
         }
       } else if (configRes.status === 404) {
         // No active quiz - try to fetch latest quiz for correct answers
@@ -244,6 +247,59 @@ export default function QuizAdminPage() {
       document.body.removeChild(a);
     } catch (error) {
       alert('Failed to export PDF. Please try again.');
+    }
+  };
+
+  const handleExportScoringCSV = async () => {
+    try {
+      const response = await fetch('/api/quiz/export/scoring');
+      if (!response.ok) {
+        throw new Error('Export failed');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `quiz-scoring-template-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      alert('Failed to export scoring CSV. Please try again.');
+    }
+  };
+
+  const handleToggleGoogleFormsRedirect = async () => {
+    const newValue = !redirectToGoogleForms;
+    setTogglingRedirect(true);
+    
+    try {
+      const response = await fetch('/api/quiz/toggle-google-forms-redirect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: newValue }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to toggle redirect');
+      }
+
+      const data = await response.json();
+      setRedirectToGoogleForms(newValue);
+      
+      // Show success message
+      if (newValue) {
+        alert('Google Forms redirect enabled. The entire site will now redirect to the Google Forms quiz.');
+      } else {
+        alert('Google Forms redirect disabled. The site will use the built-in quiz system.');
+      }
+    } catch (error: any) {
+      alert(`Failed to toggle redirect: ${error.message}`);
+    } finally {
+      setTogglingRedirect(false);
     }
   };
 
@@ -419,6 +475,13 @@ export default function QuizAdminPage() {
                   >
                     <Download className="h-4 w-4" />
                     Export PDF
+                  </Button>
+                  <Button
+                    onClick={handleExportScoringCSV}
+                    className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                  >
+                    <Download className="h-4 w-4" />
+                    Export Scoring Template
                   </Button>
                 </div>
               </div>
@@ -626,6 +689,42 @@ export default function QuizAdminPage() {
                   </p>
                 </div>
               </div>
+            </div>
+
+            {/* Google Forms Redirect Toggle */}
+            <div className="bg-white shadow rounded-lg p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Google Forms Redirect</h2>
+              <p className="text-gray-600 mb-4">
+                When enabled, the entire site will redirect to the Google Forms quiz instead of the built-in quiz system.
+              </p>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={handleToggleGoogleFormsRedirect}
+                  disabled={togglingRedirect}
+                  className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                    redirectToGoogleForms ? 'bg-blue-600' : 'bg-gray-200'
+                  } ${togglingRedirect ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  role="switch"
+                  aria-checked={redirectToGoogleForms}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                      redirectToGoogleForms ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+                <span className="text-sm font-medium text-gray-700">
+                  {redirectToGoogleForms ? 'Enabled' : 'Disabled'}
+                </span>
+                {togglingRedirect && (
+                  <span className="text-sm text-gray-500">Updating...</span>
+                )}
+              </div>
+              {redirectToGoogleForms && (
+                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-yellow-800 text-sm">
+                  ⚠️ Google Forms redirect is enabled. All visitors will be redirected to: <a href="https://forms.gle/f4QXcT2t2Csm9ooGA" target="_blank" rel="noopener noreferrer" className="underline">https://forms.gle/f4QXcT2t2Csm9ooGA</a>
+                </div>
+              )}
             </div>
 
             {/* Sanity Studio Section */}

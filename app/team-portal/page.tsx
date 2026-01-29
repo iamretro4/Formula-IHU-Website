@@ -1,6 +1,12 @@
 export default function TeamPortalPage() {
   return (
     <div className="bg-white">
+      {/* Refresh Banner */}
+      <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4 mt-4 max-w-4xl mx-auto">
+        <p className="text-sm font-semibold text-red-900 text-center">
+          ⚠️ Please refresh the page at 13:00 CET to access the quiz
+        </p>
+      </div>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Team Portal</h1>

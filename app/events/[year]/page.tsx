@@ -205,6 +205,12 @@ export default async function EventPage({
         {/* Registration Quiz Guidelines - Only show for 2026 */}
         {yearNum === 2026 && (
           <section className="mb-12">
+            {/* Refresh Banner */}
+            <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4 mb-6">
+              <p className="text-sm font-semibold text-red-900 text-center">
+                ⚠️ Please refresh the page at 13:00 CET to access the quiz
+              </p>
+            </div>
             <div className="bg-gray-50 rounded-lg p-8 border-2 border-gray-200">
               <div className="flex items-center justify-center mb-6">
                 <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">

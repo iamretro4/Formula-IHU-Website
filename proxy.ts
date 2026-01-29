@@ -22,6 +22,7 @@ const EXCLUDED_PATHS = [
 let quizStatusCache: {
   isActive: boolean;
   testMode: boolean;
+  redirectToGoogleForms: boolean;
   timestamp: number;
 } | null = null;
 
@@ -63,6 +64,7 @@ export async function proxy(request: NextRequest) {
         _id,
         isActive,
         testMode,
+        redirectToGoogleForms,
         scheduledStartTime
       }`;
 
@@ -87,16 +89,24 @@ export async function proxy(request: NextRequest) {
       quizStatusCache = {
         isActive: isQuizActive,
         testMode: quiz?.testMode || false,
+        redirectToGoogleForms: quiz?.redirectToGoogleForms || false,
         timestamp: now,
       };
     }
 
-    // If quiz is active and NOT in test mode, redirect to registration-tests
+    // If quiz is active and NOT in test mode, redirect appropriately
     if (isQuizActive && !quizStatusCache?.testMode) {
-      const redirectUrl = new URL('/registration-tests', request.url);
-      // Preserve query parameters if any
-      redirectUrl.search = request.nextUrl.search;
-      return NextResponse.redirect(redirectUrl);
+      // Check if Google Forms redirect is enabled
+      if (quizStatusCache?.redirectToGoogleForms) {
+        // Redirect to Google Forms
+        return NextResponse.redirect('https://forms.gle/f4QXcT2t2Csm9ooGA');
+      } else {
+        // Redirect to built-in quiz system
+        const redirectUrl = new URL('/registration-tests', request.url);
+        // Preserve query parameters if any
+        redirectUrl.search = request.nextUrl.search;
+        return NextResponse.redirect(redirectUrl);
+      }
     }
   } catch (error) {
     // On error, allow normal navigation (fail open)

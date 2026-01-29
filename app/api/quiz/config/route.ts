@@ -34,6 +34,7 @@ export async function GET() {
       title,
       isActive,
       scheduledStartTime,
+      redirectToGoogleForms,
       questions[] {
         text,
         type,
@@ -74,6 +75,7 @@ export async function GET() {
         title,
         isActive,
         scheduledStartTime,
+        redirectToGoogleForms,
         questions[] {
           text,
           type,
@@ -162,6 +164,7 @@ export async function GET() {
       durationMinutes: fullQuizData.durationMinutes,
       questions: transformedQuestions, // No correctOption sent to client
       instructions: fullQuizData.instructions,
+      redirectToGoogleForms: quiz.redirectToGoogleForms || false,
     };
 
     // Update shared cache with full data (includes correctOption for server-side use)

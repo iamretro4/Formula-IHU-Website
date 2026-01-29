@@ -27,6 +27,13 @@ export default defineType({
       initialValue: false,
     }),
     defineField({
+      name: 'redirectToGoogleForms',
+      title: 'Redirect to Google Forms',
+      type: 'boolean',
+      description: 'When enabled, the entire site will redirect to the Google Forms quiz instead of the built-in quiz system.',
+      initialValue: false,
+    }),
+    defineField({
       name: 'scheduledStartTime',
       title: 'Scheduled Start Date & Time',
       type: 'datetime',

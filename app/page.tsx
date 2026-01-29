@@ -111,6 +111,12 @@ export default async function Home() {
         />
       )}
       <div className="flex flex-col">
+      {/* Refresh Banner */}
+      <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4 mt-4 max-w-7xl mx-auto">
+        <p className="text-sm font-semibold text-red-900 text-center">
+          ⚠️ Please refresh the page at 13:00 CET to access the quiz
+        </p>
+      </div>
       <Hero />
       
       {/* Competition Info Section */}
