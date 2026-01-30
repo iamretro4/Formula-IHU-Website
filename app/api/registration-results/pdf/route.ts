@@ -39,7 +39,7 @@ function addCategoryToPdf(
     ]);
 
     autoTable(doc, {
-      head: [['Team', 'Score', 'Time']],
+      head: [['Team', 'Score', 'Time (h:mm)']],
       body: tableData,
       startY: y,
       styles: { fontSize: TABLE_FONT_SIZE },

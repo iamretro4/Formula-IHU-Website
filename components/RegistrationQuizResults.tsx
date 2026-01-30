@@ -33,7 +33,7 @@ function SectionTable({
             <tr className="bg-gray-50 border-b border-gray-200">
               <th className="text-left py-3 px-4 font-semibold text-gray-700">Team</th>
               <th className="text-right py-3 px-4 font-semibold text-gray-700">Score</th>
-              <th className="text-right py-3 px-4 font-semibold text-gray-700">Time</th>
+              <th className="text-right py-3 px-4 font-semibold text-gray-700">Time (h:mm)</th>
             </tr>
           </thead>
           <tbody>
