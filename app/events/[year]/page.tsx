@@ -1,10 +1,12 @@
 import { notFound } from 'next/navigation';
 import { getEventByYear, getEventDocuments, getRegisteredTeams, getResults } from '@/lib/sanity.queries';
+import { getRegistrationQuizResults } from '@/lib/registration-results';
 import { urlFor } from '@/sanity/lib/image';
 import Image from 'next/image';
 import Link from 'next/link';
 import DocumentCard from '@/components/DocumentCard';
 import ResultCard from '@/components/ResultCard';
+import RegistrationQuizResults from '@/components/RegistrationQuizResults';
 import { generateMetadata as generateSEOMetadata } from '@/lib/seo';
 import { generateStructuredData } from '@/lib/seo';
 import type { Metadata } from 'next';
@@ -66,10 +68,11 @@ export default async function EventPage({
     notFound();
   }
 
-  const [documents, teams, results] = await Promise.all([
+  const [documents, teams, results, registrationResults] = await Promise.all([
     getEventDocuments(event._id).catch(() => []),
     getRegisteredTeams(event._id).catch(() => []),
     getResults(event._id).catch(() => []),
+    yearNum === 2026 ? getRegistrationQuizResults() : Promise.resolve(null),
   ]);
 
   // Get overall results for preview (top 3 from each category)
@@ -242,6 +245,18 @@ export default async function EventPage({
                   <p className="text-gray-700 text-lg">Event documents will be posted here once they are available.</p>
                 </div>
               </section>
+        )}
+
+        {/* Registration Quiz Results - FIHU 2026 */}
+        {yearNum === 2026 && registrationResults && (
+          <div className="mb-12">
+            <RegistrationQuizResults
+              ev={registrationResults.ev}
+              cv={registrationResults.cv}
+              eventYear={yearNum}
+              eventHref={null}
+            />
+          </div>
         )}
 
         {/* Results - Only show for past or current events, not upcoming */}

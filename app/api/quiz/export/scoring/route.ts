@@ -14,6 +14,10 @@ function escapeCsv(value: any): string {
   return str;
 }
 
+// Formula separator: Google Sheets uses ; in most locales (Europe etc), US uses ,
+// Using ; so formulas work after CSV import in more locales; US users can Find & Replace ; with ,
+const F = ';';
+
 // Helper function to convert column index to Excel column letter (A, B, C, ..., Z, AA, AB, ...)
 function getColumnLetter(colIndex: number): string {
   let result = '';
@@ -172,7 +176,7 @@ export async function GET(request: NextRequest) {
 
     // Configuration row (Row 2): Contains weights and correct answers for all questions
     const configRow: string[] = [
-      'CONFIG (Fill weights and correct answers here)',
+      'CONFIG: Fill weights and correct answers below. Scores use ; in formulas. US locale: replace ; with , in Score columns if needed.',
       '',
       '',
       '',
@@ -267,14 +271,15 @@ export async function GET(request: NextRequest) {
         const correctAnswerCell = `${correctAnswerColLetter}${configRowIndex}`; // Reference config row
         
         // Formula: IF empty -> 0, IF matches correct -> weight, ELSE -> -weight*0.5
-        const scoreFormula = `=IF(TRIM(${answerCell})="", 0, IF(TRIM(${answerCell})=TRIM(${correctAnswerCell}), ${weightCell}, -${weightCell}*0.5))`;
+        // Use LEN(...)=0 instead of ="", and semicolons, so CSV import doesn't break (no quotes in formula)
+        const scoreFormula = `=IF(LEN(TRIM(${answerCell}))=0${F} 0${F} IF(TRIM(${answerCell})=TRIM(${correctAnswerCell})${F} ${weightCell}${F} -${weightCell}*0.5))`;
         
         row.push(scoreFormula);
         scoreColumns.push(`${getColumnLetter(colInfo.scoreCol)}${dataRowIndex}`);
       });
       
       // Build final score formula (sum of all score columns)
-      const finalScoreFormula = `=SUM(${scoreColumns.join(',')})`;
+      const finalScoreFormula = `=SUM(${scoreColumns.join(F)})`;
       row.push(finalScoreFormula);
       
       csvRows.push(row.map(escapeCsv).join(','));

@@ -2,7 +2,9 @@ import Hero from '@/components/Hero';
 import NewsSection from '@/components/NewsSection';
 import DocumentCard from '@/components/DocumentCard';
 import StatisticsSection from '@/components/StatisticsSection';
+import RegistrationQuizResults from '@/components/RegistrationQuizResults';
 import { getFeaturedNews, getDocuments, getHomePageContent, getEvents } from '@/lib/sanity.queries';
+import { getRegistrationQuizResults } from '@/lib/registration-results';
 import Link from 'next/link';
 import { ArrowRight, FileText, Users, Mail } from 'lucide-react';
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
@@ -78,6 +80,9 @@ export default async function Home() {
     return `${start.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} to ${end.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}, ${year}`;
   };
   
+  // Registration quiz results for FIHU 2026 (for home page section)
+  const registrationResults = await getRegistrationQuizResults().catch(() => null);
+
   // Get competition title and description
   const competitionTitle = nextEvent 
     ? nextEvent.title || `Formula IHU ${nextEvent.year}`
@@ -126,6 +131,21 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* Registration Quiz Results - FIHU 2026 */}
+      {registrationResults && (
+        <section className="py-12 sm:py-16 lg:py-20 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <RegistrationQuizResults
+              ev={registrationResults.ev}
+              cv={registrationResults.cv}
+              eventYear={2026}
+              eventHref="/events/2026#registration-results"
+              compact
+            />
+          </div>
+        </section>
+      )}
 
       {/* Featured Documents */}
       {featuredDocs.length > 0 ? (
