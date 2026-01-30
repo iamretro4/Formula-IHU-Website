@@ -4,9 +4,17 @@ export default function TeamPortalPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Team Portal</h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-gray-600 mb-6">
             Access your team dashboard, submit documents, and manage your registration.
           </p>
+          <a
+            href="https://hub.fihu.gr"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 text-base font-semibold rounded-lg bg-gradient-primary text-white shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all focus-ring"
+          >
+            Login
+          </a>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
