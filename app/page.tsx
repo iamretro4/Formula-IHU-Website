@@ -117,22 +117,8 @@ export default async function Home() {
       )}
       <div className="flex flex-col">
       <Hero />
-      
-      {/* Competition Info Section */}
-      <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-b from-white via-gray-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">
-              {competitionTitle}
-            </h2>
-            <p className="text-lg sm:text-xl md:text-2xl text-gray-700 max-w-4xl mx-auto leading-relaxed px-4">
-              {competitionDescription}
-            </p>
-          </div>
-        </div>
-      </section>
 
-      {/* Registration Quiz Results - FIHU 2026 */}
+      {/* Registration Quiz Results - FIHU 2026 (replaces countdown) */}
       {registrationResults && (
         <section className="py-12 sm:py-16 lg:py-20 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -146,6 +132,20 @@ export default async function Home() {
           </div>
         </section>
       )}
+
+      {/* Competition Info Section */}
+      <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-b from-white via-gray-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">
+              {competitionTitle}
+            </h2>
+            <p className="text-lg sm:text-xl md:text-2xl text-gray-700 max-w-4xl mx-auto leading-relaxed px-4">
+              {competitionDescription}
+            </p>
+          </div>
+        </div>
+      </section>
 
       {/* Featured Documents */}
       {featuredDocs.length > 0 ? (

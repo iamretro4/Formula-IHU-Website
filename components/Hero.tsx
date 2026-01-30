@@ -4,7 +4,6 @@ import { urlFor } from '@/sanity/lib/image';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import Logo from './Logo';
-import CountdownTimer from './CountdownTimer';
 import ImageCarousel from './ImageCarousel';
 
 export default async function Hero() {
@@ -62,17 +61,8 @@ export default async function Hero() {
                   {formatDate(featuredEvent.startDate)} - {formatDate(featuredEvent.endDate)}
                 </p>
                 <p className="text-base md:text-lg text-gray-300 mb-6">{featuredEvent.location}</p>
-                
-                {/* Countdown to competition */}
-                  {featuredEvent.startDate && (
-                    <div className="mt-6">
-                      <CountdownTimer
-                        targetDate={featuredEvent.startDate.includes('T') ? featuredEvent.startDate : `${featuredEvent.startDate}T00:00:00.000Z`}
-                        eventTitle="Competition starts in"
-                      />
-                    </div>
-                  )}
-                    <div className="mt-4 flex justify-center">
+
+                <div className="mt-4 flex justify-center">
                       <Link
                         href="/events/2026"
                         className="inline-flex items-center justify-center gap-2 px-6 py-3 text-base font-semibold rounded-lg transition-all bg-white/20 backdrop-blur-sm border-2 border-white/40 text-white hover:bg-white/30 shadow-md hover:shadow-xl hover:-translate-y-0.5"
